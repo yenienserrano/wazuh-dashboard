@@ -17,6 +17,7 @@ For that, we need to:
 - [ ] Identify improvements and potential impact on the UI.
 - [ ] Create new tracking and development branches.
 - [ ] Develop a testing environment to verify our components would work under this new build.
+- [ ] Generate production packages and verify they install and work as expected.
 
 
 ## Issues
