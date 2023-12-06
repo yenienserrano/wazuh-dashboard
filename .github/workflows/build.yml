@@ -3,6 +3,13 @@
 name: Build
 
 on:
+  workflow_call:
+    inputs:
+      CHECKOUT_TO: # This is the branch to checkout to. Defaults to 'master'
+        description: 'The branch/tag/commit to checkout to'
+        required: true
+        default: ''
+        type: string
   workflow_dispatch:
     inputs:
       CHECKOUT_TO: # This is the branch to checkout to. Defaults to 'master'
@@ -26,6 +33,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          repository: wazuh/wazuh-dashboard
           path: ./artifacts
           ref: ${{ inputs.CHECKOUT_TO }}
 
