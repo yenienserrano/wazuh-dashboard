@@ -29,7 +29,7 @@ jobs:
 
   build-dashboard:
     name: Build dashboard
-    uses: yenienserrano/wazuh-dashboard/.github/workflows/build.yml@4.9.0
+    uses: yenienserrano/wazuh-dashboard/.github/workflows/build.yml@120-update-github-actions
     with:
       CHECKOUT_TO: ${{ inputs.REFERENCE_WAZUH_DASHBOARD }}
 
