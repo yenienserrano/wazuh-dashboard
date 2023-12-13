@@ -11,8 +11,8 @@ RUN mkdir -p $INSTALL_DIR
 RUN mkdir -p /tmp
 
 # Download and extract wazuh-dashboard
-COPY ./$PACKAGE_PATH /tmp
-RUN unzip /tmp/$PACKAGE_PATH -d /tmp/tar/
+COPY ./$PACKAGE_NAME /tmp
+RUN unzip /tmp/$PACKAGE_NAME -d /tmp/tar/
 RUN tar -xf /tmp/tar/$(ls /tmp/tar) --directory  $INSTALL_DIR --strip-components=1
 
 # Generate certificates
