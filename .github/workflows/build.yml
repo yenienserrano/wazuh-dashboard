@@ -27,7 +27,7 @@ jobs:
     strategy:
       matrix:
         DISTRIBUTION: [ tar.gz ]
-        ARCHITECTURE: [ x64, arm64 ]
+        ARCHITECTURE: [ x64 ]
 
     steps:
       - name: Checkout code
