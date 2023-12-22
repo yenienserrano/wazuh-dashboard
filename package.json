@@ -19,6 +19,10 @@
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
   },
+  "wazuh": {
+    "version": "4.9.0",
+    "revision": "00"
+  },
   "homepage": "https://opensearch.org",
   "bugs": {
     "url": "http://github.com/opensearch-project/OpenSearch-Dashboards/issues"
@@ -82,7 +86,9 @@
     "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
     "osd:ciGroup10": "echo \"dashboard_sanity_test_spec.js\"",
     "osd:ciGroup11": "echo \"apps/vis_builder/*.js\"",
-    "generate:opensearchsqlantlr": "./node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/plugins/data/public/antlr/opensearch_sql/.generated -visitor -no-listener -Xexact-output-dir ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLLexer.g4 ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLParser.g4"
+    "generate:opensearchsqlantlr": "./node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/plugins/data/public/antlr/opensearch_sql/.generated -visitor -no-listener -Xexact-output-dir ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLLexer.g4 ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLParser.g4",
+    "wzd-revision": "scripts/use_node -e \"console.log(require('./package.json').wazuh.revision)\"",
+    "wzd-version": "scripts/use_node -e \"console.log(require('./package.json').wazuh.version)\""
   },
   "repository": {
     "type": "git",
