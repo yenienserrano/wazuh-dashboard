@@ -33,6 +33,14 @@ import { AppCategory } from '../types';
 
 /** @internal */
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
+  explore: {
+    id: 'explore',
+    label: i18n.translate('core.ui.exploreNavList.label', {
+      defaultMessage: 'Explore',
+    }),
+    order: 100,
+    euiIconType: 'search',
+  },
   opensearchDashboards: {
     id: 'opensearchDashboards',
     label: i18n.translate('core.ui.opensearchDashboardsNavList.label', {
