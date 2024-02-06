@@ -22,7 +22,6 @@ export const HomeIcon = ({ branding, logos }: Props) => {
 
   const { url: markURL, type: markType } = logos.Mark;
 
-  let markIcon = markURL;
   let testSubj = `${markType}Mark`;
   // Marks look better at the large size
   let markIconSize: IconSize = 'l';
@@ -39,8 +38,8 @@ export const HomeIcon = ({ branding, logos }: Props) => {
   return (
     <EuiIcon
       data-test-subj={testSubj}
-      data-test-image-url={markIcon}
-      type={markIcon}
+      data-test-image-url={markURL}
+      type={markURL}
       title={alt}
       size={markIconSize}
       className="logoImage"
