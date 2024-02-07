@@ -38,18 +38,20 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects(['common']);
-  const find = getService('find');
+  const browser = getService('browser');
 
   const defaultFindTimeout = config.get('timeouts.find');
 
   class HeaderPage {
     public async clickDiscover() {
+      await browser.setLocalStorageItem('core.navGroup.explore', 'true');
       await appsMenu.clickLink('Discover', { category: 'explore' });
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     public async clickVisualize() {
+      await browser.setLocalStorageItem('core.navGroup.explore', 'true');
       await appsMenu.clickLink('Visualize', { category: 'explore' });
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
@@ -64,6 +66,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async clickDashboard() {
+      await browser.setLocalStorageItem('core.navGroup.explore', 'true');
       await appsMenu.clickLink('Dashboard', { category: 'explore' });
       await retry.waitFor('dashboard app to be loaded', async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
@@ -74,6 +77,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async clickStackManagement() {
+      await browser.setLocalStorageItem('core.navGroup.management', 'true');
       await appsMenu.clickLink('Dashboards Management', { category: 'management' });
       await this.awaitGlobalLoadingIndicatorHidden();
     }

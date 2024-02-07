@@ -143,9 +143,6 @@ export function AppsMenuProvider({ getService, getPageObjects }: FtrProviderCont
         let nav;
         if (typeof category === 'string') {
           nav = await testSubjects.find(`collapsibleNavGroup-${category}`);
-          console.log(nav);
-          const btn = await nav.findByCssSelector('button');
-          await btn.click();
         } else {
           nav = await testSubjects.find('collapsibleNav');
         }
