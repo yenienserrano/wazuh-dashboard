@@ -44,14 +44,14 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
 
   class HeaderPage {
     public async clickDiscover() {
-      await find.clickByDisplayedLinkText('Explore');
+      await appsMenu.clickLink('Explore');
       await appsMenu.clickLink('Discover', { category: 'explore' });
       await PageObjects.common.waitForTopNavToBeVisible();
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 
     public async clickVisualize() {
-      await find.clickByDisplayedLinkText('Explore');
+      await appsMenu.clickLink('Explore');
       await appsMenu.clickLink('Visualize', { category: 'explore' });
       await this.awaitGlobalLoadingIndicatorHidden();
       await retry.waitFor('first breadcrumb to be "Visualize"', async () => {
@@ -66,7 +66,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async clickDashboard() {
-      await find.clickByDisplayedLinkText('Explore');
+      await appsMenu.clickLink('Explore');
       await appsMenu.clickLink('Dashboard', { category: 'explore' });
       await retry.waitFor('dashboard app to be loaded', async () => {
         const isNavVisible = await testSubjects.exists('top-nav');
@@ -77,7 +77,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async clickStackManagement() {
-      await find.clickByDisplayedLinkText('Management');
+      await appsMenu.clickLink('Management');
       await appsMenu.clickLink('Dashboards Management', { category: 'management' });
       await this.awaitGlobalLoadingIndicatorHidden();
     }
