@@ -132,13 +132,13 @@ jobs:
 
   build-report-plugin:
     needs: [validate-inputs]
-    name: Build security plugin
-    uses: yenienserrano/wazuh-dashboards-reporting/.github/workflows/dashboards-reports-test-and-build-workflow.yml@enhancement/288-enable-notification-plugin-in-reporting
+    name: Build reporting plugin
+    uses: yenienserrano/wazuh-dashboards-reporting/.github/workflows/dashboards-reports-test-and-build-workflow.yml@288-enable-notification-plugin-in-reporting
     with:
       reference: ${{ inputs.reference_report_plugins }}
 
   build-and-test-package:
-    needs: [build-main-plugins, build-base, build-security-plugin]
+    needs: [build-main-plugins, build-base, build-security-plugin, build-report-plugin]
     runs-on: ubuntu-latest
     name: Generate packages
     steps:
@@ -166,6 +166,7 @@ jobs:
           echo "WAZUH_DASHBOARD_SLIM=wazuh-dashboard_${{ env.VERSION }}-${{ env.REVISION }}_x64.tar.gz" >> $GITHUB_ENV
           echo "WAZUH_SECURITY_PLUGIN=wazuh-security-dashboards-plugin_${{ env.VERSION }}-${{ env.REVISION }}_${{ inputs.reference_security_plugins }}.zip" >> $GITHUB_ENV
           echo "WAZUH_PLUGINS=wazuh-dashboard-plugins_${{ env.VERSION }}-${{ env.REVISION }}_${{ inputs.reference_wazuh_plugins }}.zip" >> $GITHUB_ENV
+          echo "WAZUH_REPORT_PLUGIN=reports-dashboards_${{ env.VERSION }}-${{ env.REVISION }}_${{ inputs.reference_report_plugins }}.zip" >> $GITHUB_ENV
           if [ "${{ inputs.system }}" = "deb" ]; then
             if [ "${{ inputs.is_stage }}" = "true" ]; then
               echo "PACKAGE_NAME=wazuh-dashboard_${{ env.VERSION }}-${{ inputs.revision }}_${{ inputs.architecture }}.deb" >> $GITHUB_ENV
@@ -201,7 +202,7 @@ jobs:
       - name: Download report plugin artifact
         uses: actions/download-artifact@v3
         with:
-          name: wazuh-dashboard-reporting_${{ env.VERSION }}-${{ env.REVISION }}_${{ inputs.reference_report_plugins }}.zip
+          name: ${{ env.WAZUH_REPORT_PLUGIN }}
           path: ${{ env.CURRENT_DIR }}/artifacts/report-plugin
 
       - name: Zip plugins
@@ -235,7 +236,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: wazuh-package-with-report-plugin
-          path: ${{ env.CURRENT_DIR }}/dev-tools/build-packages/output/
+          path: ${{ env.CURRENT_DIR }}/dev-tools/build-packages/output/${{ inputs.system }}/${{env.PACKAGE_NAME}}
 
 
 
