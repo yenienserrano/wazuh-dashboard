@@ -133,7 +133,7 @@ jobs:
   build-report-plugin:
     needs: [validate-inputs]
     name: Build reporting plugin
-    uses: yenienserrano/wazuh-dashboards-reporting/.github/workflows/dashboards-reports-test-and-build-workflow.yml@288-enable-notification-plugin-in-reporting
+    uses: yenienserrano/wazuh-dashboards-reporting/.github/workflows/manual-build.yml@288-enable-notification-plugin-in-reporting
     with:
       reference: ${{ inputs.reference_report_plugins }}
 
