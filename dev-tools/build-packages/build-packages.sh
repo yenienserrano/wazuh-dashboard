@@ -130,6 +130,14 @@ main() {
                 help 0
             fi
             ;;
+        "-rp" | "--reportPlugin")
+            if [ -n "${2}" ]; then
+                reportPlugin="${2}"
+                shift 2
+            else
+                help 0
+            fi
+            ;;
         "-v" | "--version")
             if [ -n "${2}" ]; then
                 version="${2}"

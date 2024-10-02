@@ -16,6 +16,7 @@ base=""
 revision="1"
 security=""
 version=""
+reportPlugin=""
 
 # Paths
 current_path="$( cd $(dirname $0) ; pwd -P )"
@@ -72,7 +73,22 @@ build() {
         echo "The given URL or Path to the Wazuh App is not valid: ${app}"
         clean 1
     fi
-
+    echo
+    echo "Downloading report plugin.."
+    echo
+    if [[ $reportPlugin =~ $valid_url ]]; then
+        if ! curl --output applications/reportPlugin.zip --silent --fail "${reportPlugin}"; then
+            echo "The given URL or Path to the Wazuh Apps is not working: ${reportPlugin}"
+            clean 1
+        else
+            echo "Extracting applications from reportPlugin.zip"
+            unzip -q applications/reportPlugin.zip -d applications
+            rm applications/reportPlugin.zip
+        fi
+    else
+        echo "The given URL or Path to the Wazuh App is not valid: ${reportPlugin}"
+        clean 1
+    fi
     echo
     echo "Downloading dashboards..."
     echo
@@ -150,9 +166,6 @@ build() {
     category_explore='{id:"explore",label:"Explore",order:100,euiIconType:"search"}'
     category_dashboard_management='{id:"management",label:"Index management",order:5e3,euiIconType:"managementApp"}'
 
-    # Replace app category to Reporting app
-    sed -i -e "s|category:{id:\"opensearch\",label:_i18n.i18n.translate(\"opensearch.reports.categoryName\",{defaultMessage:\"OpenSearch Plugins\"}),order:2e3}|category:${category_explore}|" ./plugins/reportsDashboards/target/public/reportsDashboards.plugin.js
-
     # Replace app category to Alerting app
     sed -i -e "s|category:{id:\"opensearch\",label:\"OpenSearch Plugins\",order:2e3}|category:${category_explore}|" ./plugins/alertingDashboards/target/public/alertingDashboards.plugin.js
 
@@ -167,7 +180,6 @@ build() {
 
     # Generate compressed files
     files_to_recreate=(
-      ./plugins/reportsDashboards/target/public/reportsDashboards.plugin.js
       ./plugins/alertingDashboards/target/public/alertingDashboards.plugin.js
       ./plugins/customImportMapDashboards/target/public/customImportMapDashboards.plugin.js
       ./plugins/notificationsDashboards/target/public/notificationsDashboards.plugin.js
@@ -248,6 +260,14 @@ main() {
         "-b" | "--base")
             if [ -n "${2}" ]; then
                 base="${2}"
+                shift 2
+            else
+                help 0
+            fi
+            ;;
+        "-rp" | "--reportPlugin")
+            if [ -n "${2}" ]; then
+                reportPlugin="${2}"
                 shift 2
             else
                 help 0
