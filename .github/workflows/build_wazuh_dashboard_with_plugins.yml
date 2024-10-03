@@ -232,6 +232,12 @@ jobs:
           bash ./test-packages.sh \
             -p ${{env.PACKAGE_NAME}}
 
+      - name: Upload package with report plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: wazuh-package-with-report-plugin
+          path: ${{ env.CURRENT_DIR }}/dev-tools/build-packages/base/output/wazuh-dashboard-${{ env.version }}-${{env.revision}}-linux-x64.tar.gz
+
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
