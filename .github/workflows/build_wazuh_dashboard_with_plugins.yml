@@ -207,20 +207,10 @@ jobs:
 
       - name: Zip plugins
         run: |
-          echo "ls -la ${{ env.CURRENT_DIR }}/artifacts/dashboard"
-          ls -la ${{ env.CURRENT_DIR }}/artifacts/dashboard
-          echo "ls -la ${{ env.CURRENT_DIR }}/artifacts/plugins"
-          ls -la ${{ env.CURRENT_DIR }}/artifacts/plugins
-          echo "ls -la ${{ env.CURRENT_DIR }}/artifacts/security-plugin"
-          ls -la ${{ env.CURRENT_DIR }}/artifacts/security-plugin
-          echo "ls -la ${{ env.CURRENT_DIR }}/artifacts/report-plugin"
-          ls -la ${{ env.CURRENT_DIR }}/artifacts/report-plugin
-          echo "Zipping plugins"
           zip -r -j ${{ env.CURRENT_DIR }}/artifacts/wazuh-package.zip ${{ env.CURRENT_DIR }}/artifacts/plugins
           zip -r -j ${{ env.CURRENT_DIR }}/artifacts/security-package.zip ${{ env.CURRENT_DIR }}/artifacts/security-plugin
           zip -r -j ${{ env.CURRENT_DIR }}/artifacts/dashboard-package.zip ${{ env.CURRENT_DIR }}/artifacts/dashboard/${{ env.WAZUH_DASHBOARD_SLIM }}
           zip -r -j ${{ env.CURRENT_DIR }}/artifacts/report-package.zip ${{ env.CURRENT_DIR }}/artifacts/report-plugin
-          ls -la ${{ env.CURRENT_DIR }}/artifacts
 
       - name: Build package
         run: |

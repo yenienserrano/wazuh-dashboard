@@ -74,22 +74,6 @@ build() {
         clean 1
     fi
     echo
-    echo "Downloading report plugin.."
-    echo
-    if [[ $reportPlugin =~ $valid_url ]]; then
-        if ! curl --output applications/reportPlugin.zip --silent --fail "${reportPlugin}"; then
-            echo "The given URL or Path to the Wazuh Apps is not working: ${reportPlugin}"
-            clean 1
-        else
-            echo "Extracting applications from reportPlugin.zip"
-            unzip -q applications/reportPlugin.zip -d applications
-            rm applications/reportPlugin.zip
-        fi
-    else
-        echo "The given URL or Path to the Wazuh App is not valid: ${reportPlugin}"
-        clean 1
-    fi
-    echo
     echo "Downloading dashboards..."
     echo
     if [[ $base =~ $valid_url ]]; then
@@ -132,6 +116,24 @@ build() {
         clean 1
     fi
 
+    echo
+    echo "Downloading report plugin.."
+    echo
+
+    if [[ $reportPlugin =~ $valid_url ]]; then
+        if ! curl --output applications/reporting.zip --silent --fail "${reportPlugin}"; then
+            echo "The given URL or Path to the Wazuh Reporting Plugin is not working: ${reportPlugin}"
+            clean 1
+        else
+            echo "Extracting Reporting application"
+            unzip -q applications/reporting.zip -d applications
+            rm applications/reporting.zip
+        fi
+    else
+        echo "The given URL or Path to the Wazuh Reporting Plugin is not valid: ${reportPlugin}"
+        clean 1
+    fi
+
     tar -zxf wazuh-dashboard.tar.gz
     directory_name=$(ls -td */ | head -1)
     working_dir="wazuh-dashboard-$version-$revision-linux-x64"
@@ -142,7 +144,7 @@ build() {
     echo Building the package...
     echo
 
-    # Install Wazuh apps and Security app
+    # Install Wazuh apps, Reporting app and Security app
 
     plugins=$(ls $tmp_dir/applications)' '$(cat $current_path/plugins)
     for plugin in $plugins; do
