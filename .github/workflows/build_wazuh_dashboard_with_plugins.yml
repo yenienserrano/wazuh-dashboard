@@ -6,15 +6,15 @@ on:
     inputs:
       system:
         type: choice
-        description: 'Package OS'
+        description: "Package OS"
         required: true
         options:
           - deb
           - rpm
-        default: 'deb'
+        default: "deb"
       architecture:
         type: choice
-        description: 'Package architecture'
+        description: "Package architecture"
         required: true
         options:
           - amd64
@@ -22,31 +22,31 @@ on:
         default: amd64
       revision:
         type: string
-        description: 'Package revision'
+        description: "Package revision"
         required: true
-        default: '0'
+        default: "0"
       reference_security_plugins:
         type: string
-        description: 'Branch/tag/commit of the wazuh-security-dashboards-plugin repository to build the security plugin'
+        description: "Branch/tag/commit of the wazuh-security-dashboards-plugin repository to build the security plugin"
         required: true
-        default: 'master'
+        default: "master"
       reference_wazuh_plugins:
         type: string
-        description: 'Branch/tag/commit of the wazuh-dashboard-plugins repository to build the main plugins'
+        description: "Branch/tag/commit of the wazuh-dashboard-plugins repository to build the main plugins"
         required: true
-        default: 'master'
+        default: "master"
       is_stage:
         type: boolean
-        description: 'Set production nomenclature'
+        description: "Set production nomenclature"
         required: true
         default: false
       checksum:
         type: boolean
-        description: 'Generate package checksum'
+        description: "Generate package checksum"
         required: true
         default: false
       id:
-        description: 'ID used to identify the workflow uniquely.'
+        description: "ID used to identify the workflow uniquely."
         type: string
         required: false
 
@@ -55,7 +55,7 @@ on:
       system:
         type: string
         required: true
-        default: 'deb'
+        default: "deb"
       architecture:
         type: string
         required: true
@@ -63,15 +63,15 @@ on:
       revision:
         type: string
         required: true
-        default: '0'
+        default: "0"
       reference_security_plugins:
         type: string
         required: true
-        default: 'master'
+        default: "master"
       reference_wazuh_plugins:
         type: string
         required: true
-        default: 'master'
+        default: "master"
       is_stage:
         type: boolean
         required: true
@@ -197,7 +197,8 @@ jobs:
       reference: ${{ inputs.reference_security_plugins }}
 
   build-and-test-package:
-    needs: [setup-variables, build-main-plugins, build-base, build-security-plugin]
+    needs:
+      [setup-variables, build-main-plugins, build-base, build-security-plugin]
     runs-on: ubuntu-latest
     name: Generate packages
     steps:
@@ -207,8 +208,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
+          node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Download dashboard artifact
         uses: actions/download-artifact@v3
