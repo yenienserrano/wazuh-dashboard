@@ -62,7 +62,7 @@ jobs:
           disk-root: 'C:'
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup JDK (Windows only)
         if: matrix.os == 'windows-latest'
@@ -170,7 +170,7 @@ jobs:
           disk-root: 'C:'
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup JDK (Windows only)
         if: matrix.os == 'windows-latest'
@@ -286,7 +286,7 @@ jobs:
           disk-root: 'C:'
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup JDK (Windows only)
         if: matrix.os == 'windows-latest'
@@ -418,7 +418,7 @@ jobs:
           disk-root: 'C:'
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ./artifacts
 
@@ -507,7 +507,7 @@ jobs:
           ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ./artifacts
 
