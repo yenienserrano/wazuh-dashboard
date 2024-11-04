@@ -72,7 +72,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -180,7 +180,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -296,7 +296,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -423,7 +423,7 @@ jobs:
           path: ./artifacts
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
@@ -515,7 +515,7 @@ jobs:
       - run: echo [NOTE] These tests will be ran using Linux x64 release builds without security
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: './artifacts/.nvmrc'
           registry-url: 'https://registry.npmjs.org'
