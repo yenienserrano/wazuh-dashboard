@@ -88,7 +88,7 @@ jobs:
           ref: '${{ env.SOURCE_BRANCH }}'
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
