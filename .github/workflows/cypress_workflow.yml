@@ -145,7 +145,7 @@ jobs:
       - run: npx cypress cache path
 
       - name: Run tests
-        uses: cypress-io/github-action@v7
+        uses: cypress-io/github-action@v6
         with:
           working-directory: ${{ env.FTR_PATH }}
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
