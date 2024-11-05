@@ -159,6 +159,7 @@ jobs:
           name: ftr-cypress-screenshots
           path: ${{ env.FTR_PATH }}/cypress/screenshots
           retention-days: 1
+          overwrite: true
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -166,6 +167,7 @@ jobs:
           name: ftr-cypress-videos
           path: ${{ env.FTR_PATH }}/cypress/videos
           retention-days: 1
+          overwrite: true
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -173,6 +175,7 @@ jobs:
           name: ftr-cypress-results
           path: ${{ env.FTR_PATH }}/cypress/results
           retention-days: 1
+          overwrite: true
   add-comment:
     needs: [cypress-tests]
     if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}

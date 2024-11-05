@@ -91,3 +91,4 @@ jobs:
           name: ${{ env.ARTIFACT_BUILD_NAME }}
           path: ./artifacts/target/${{ env.ARTIFACT_BUILD_NAME }}
           retention-days: 30
+          overwrite: true
