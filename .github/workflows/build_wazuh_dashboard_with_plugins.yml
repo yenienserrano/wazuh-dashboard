@@ -197,8 +197,7 @@ jobs:
       reference: ${{ inputs.reference_security_plugins }}
 
   build-and-test-package:
-    needs:
-      [setup-variables, build-main-plugins, build-base, build-security-plugin]
+    needs: [setup-variables, build-main-plugins, build-base, build-security-plugin]
     runs-on: ubuntu-latest
     name: Generate packages
     steps:
