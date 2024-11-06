@@ -178,7 +178,7 @@ jobs:
   build-base:
     needs: [validate-job]
     name: Build dashboard
-    uses: wazuh/wazuh-dashboard/.github/workflows/build_base.yml@4.10.0
+    uses: wazuh/wazuh-dashboard/.github/workflows/build_base.yml@change/345-use-of-deprecated-actions-on-gh-workflows
     with:
       CHECKOUT_TO: ${{ github.head_ref || github.ref_name }}
 
