@@ -11,14 +11,16 @@ FILE_OWNER="wazuh-dashboard"
 
 # Remove container and image
 clean() {
-  echo $(docker ps --format "{{.Names}}")
+  echo "docker container: $(docker ps --format "{{.Names}}")"
+  echo "condition: $(docker ps --format "{{.Names}}" | grep $CONTAINER_NAME)"
   docker stop $CONTAINER_NAME
   # This is done because in the construction of packages arm sometimes fails because it is not finished destroying the container and when trying to delete the image fails because it is in use.
   MAX_RETRIES=30
   RETRY_COUNT=0
   while docker ps --format "{{.Names}}" | grep $CONTAINER_NAME; do
+    echo "condition: $(docker ps --format "{{.Names}}" | grep $CONTAINER_NAME)"
     echo "Try $RETRY_COUNT"
-    echo $(docker ps --format "{{.Names}}")
+    echo "docker container: $(docker ps --format "{{.Names}}")"
     if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
       echo "WARNING: Maximum retries reached while waiting for container to stop"
       break
