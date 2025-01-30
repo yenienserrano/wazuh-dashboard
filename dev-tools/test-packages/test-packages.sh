@@ -11,6 +11,7 @@ FILE_OWNER="wazuh-dashboard"
 
 # Remove container and image
 clean() {
+  echo "test!"
   echo "docker container: $(docker ps --format "{{.Names}}")"
   echo "condition: $(docker ps --format "{{.Names}}" | grep $CONTAINER_NAME)"
   docker stop $CONTAINER_NAME
