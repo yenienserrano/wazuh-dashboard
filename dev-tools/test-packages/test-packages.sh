@@ -16,6 +16,8 @@ clean() {
   MAX_RETRIES=30
   RETRY_COUNT=0
   while docker ps --format "{{.Names}}" | grep $CONTAINER_NAME; do
+    echo "Try $RETRY_COUNT"
+    echo $(docker ps --format "{{.Names}}")
     if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
       echo "WARNING: Maximum retries reached while waiting for container to stop"
       break
