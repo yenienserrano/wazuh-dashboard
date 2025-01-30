@@ -29,7 +29,7 @@ clean() {
     sleep 2
     RETRY_COUNT=$((RETRY_COUNT + 1))
   done
-  docker rmi $CONTAINER_NAME
+  docker rmi -f $CONTAINER_NAME 
 }
 
 # Check if files exist and are owned by wazuh-dashboard
