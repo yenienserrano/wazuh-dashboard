@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to the Wazuh app project will be documented in this file.
+All notable changes to the Wazuh app project will be documented in this file. hola
 
 ## Wazuh dashboard v5.0.0 - OpenSearch Dashboards 2.18.0 - Revision 00
 
