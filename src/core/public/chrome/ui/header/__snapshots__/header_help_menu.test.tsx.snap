@@ -1858,7 +1858,7 @@ exports[`Header help menu hides survey link 1`] = `
                         <div
                           class="euiSpacer euiSpacer--xs"
                         />
-                        
+
                         <a
                           class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                           href="https://groups.google.com/forum/#!forum/wazuh/"
