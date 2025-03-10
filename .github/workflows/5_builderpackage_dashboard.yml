@@ -142,6 +142,7 @@ jobs:
       WAZUH_SECURITY_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
       WAZUH_REPORT_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
       WAZUH_PLUGINS_CORE: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
+      WAZUH_PLUGINS_FLEET: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_FLEET }}
       WAZUH_PLUGINS_CHECK_UPDATES: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
       FINAL_NAME: ${{ steps.setup-variables.outputs.FINAL_NAME }}
       LATEST_NAME: ${{ steps.setup-variables.outputs.LATEST_NAME }}
@@ -194,6 +195,7 @@ jobs:
           WAZUH_SECURITY_PLUGIN=wazuh-security-dashboards-plugin_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_security_plugins }} | sed 's/\//-/g').zip
           WAZUH_REPORT_PLUGIN=reports-dashboards_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_report_plugins }} | sed 's/\//-/g').zip
           WAZUH_PLUGINS_CORE=wazuh-dashboard-plugins_wazuh-core_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
+          WAZUH_PLUGINS_FLEET=wazuh-dashboard-plugins_wazuh-fleet_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
           WAZUH_PLUGINS_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
           if [ "${{ inputs.is_stage }}" = "true" ]; then
             if [ "${{ inputs.system }}" = "deb" ]; then
@@ -223,6 +225,7 @@ jobs:
           echo "WAZUH_SECURITY_PLUGIN=$WAZUH_SECURITY_PLUGIN" >> $GITHUB_OUTPUT
           echo "WAZUH_REPORT_PLUGIN=$WAZUH_REPORT_PLUGIN" >> $GITHUB_OUTPUT
           echo "WAZUH_PLUGINS_CORE=$WAZUH_PLUGINS_CORE" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_FLEET=$WAZUH_PLUGINS_FLEET" >> $GITHUB_OUTPUT
           echo "WAZUH_PLUGINS_CHECK_UPDATES=$WAZUH_PLUGINS_CHECK_UPDATES" >> $GITHUB_OUTPUT
           echo "FINAL_NAME=$FINAL_NAME" >> $GITHUB_OUTPUT
           echo "LATEST_NAME=$LATEST_NAME" >> $GITHUB_OUTPUT
@@ -320,6 +323,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
+      - name: Download plugins artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_FLEET }}
           path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
       - name: Download plugins artifacts
         uses: actions/download-artifact@v4
