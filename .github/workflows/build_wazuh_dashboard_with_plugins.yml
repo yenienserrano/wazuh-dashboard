@@ -111,7 +111,7 @@ jobs:
     #   - Final package name based on system, architecture and stage.
     #   - Architecture flags.
     #   - Version, revision and commit SHA information.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Setup variables
     outputs:
       CURRENT_DIR: ${{ steps.setup-variables.outputs.CURRENT_DIR }}
@@ -219,7 +219,7 @@ jobs:
   validate-job:
     # 1. Validates valid combinations of system and architecture.
     # 2. Sets up AWS CLI for future uploads if needed.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: setup-variables
     name: Validate job
     steps:
