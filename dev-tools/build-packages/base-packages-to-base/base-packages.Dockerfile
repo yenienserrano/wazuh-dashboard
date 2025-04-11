@@ -1,11 +1,11 @@
 # Usage:
 # docker build \
 #         --build-arg NODE_VERSION=18.19.0 \
-#         --build-arg WAZUH_DASHBOARD_BRANCH=4.12.0 \
-#         --build-arg WAZUH_DASHBOARD_SECURITY_BRANCH=4.12.0 \
-#         --build-arg WAZUH_DASHBOARD_PLUGINS_BRANCH=4.12.0 \
+#         --build-arg WAZUH_DASHBOARD_BRANCH=4.12.1 \
+#         --build-arg WAZUH_DASHBOARD_SECURITY_BRANCH=4.12.1 \
+#         --build-arg WAZUH_DASHBOARD_PLUGINS_BRANCH=4.12.1 \
 #         --build-arg ARCHITECTURE=arm \
-#         -t wazuh-packages-to-base:4.12.0 \
+#         -t wazuh-packages-to-base:4.12.1 \
 #         -f base-packages.Dockerfile .
 
 ARG NODE_VERSION=18.19.0
@@ -14,7 +14,7 @@ ARG ARCHITECTURE='amd'
 ARG WAZUH_DASHBOARD_BRANCH
 ARG WAZUH_DASHBOARD_SECURITY_BRANCH
 ARG WAZUH_DASHBOARD_PLUGINS_BRANCH
-ENV OPENSEARCH_DASHBOARDS_VERSION=2.19.0
+ENV OPENSEARCH_DASHBOARDS_VERSION=2.19.1
 ENV ENV_ARCHITECTURE=${ARCHITECTURE}
 USER root
 RUN apt-get update && apt-get install -y jq
