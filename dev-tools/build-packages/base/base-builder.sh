@@ -45,7 +45,6 @@ tmp_dir="/tmp"
 out_dir="/output"
 config_path=$tmp_dir/config
 
-
 # -----------------------------------------------------------------------------
 cd $tmp_dir
 
