@@ -182,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await globalNav.clickLogo();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          expect(url.includes('/app/home')).to.be(true);
+          expect(url.includes('/app/wz-home')).to.be(true);
         });
 
         it('with customized mark logo button that navigates to home page', async () => {
@@ -190,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await globalNav.clickHomeButton();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          expect(url.includes('/app/home')).to.be(true);
+          expect(url.includes('/app/wz-home')).to.be(true);
         });
 
         // Wazuh: This test is omitted because OpenSearch Dashboards does not have a home dashboard card.
@@ -250,7 +250,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await globalNav.clickLogo();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          expect(url.includes('/app/home')).to.be(true);
+          expect(url.includes('/app/wz-home')).to.be(true);
         });
 
         it('with customized mark logo button that navigates to home page', async () => {
@@ -258,7 +258,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await globalNav.clickHomeButton();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const url = await browser.getCurrentUrl();
-          expect(url.includes('/app/home')).to.be(true);
+          expect(url.includes('/app/wz-home')).to.be(true);
         });
 
         // Wazuh: This test is omitted because OpenSearch Dashboards does not have a home dashboard card.

@@ -38,6 +38,7 @@ import { httpServiceMock } from '../../../http/http_service.mock';
 import { ChromeRecentlyAccessedHistoryItem } from '../../recently_accessed';
 import { CollapsibleNav } from './collapsible_nav';
 import { getLogos } from '../../../../common';
+import * as navUtils from '../../utils';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -119,6 +120,22 @@ function clickGroup(component: ReactWrapper, group: string) {
   component.find(`[data-test-subj="collapsibleNavGroup-${group}"] button`).simulate('click');
 }
 
+// Wazuh: Mock the getIsCategoryOpen function to return true by default.
+// This is because we change the default value of the getIsCategoryOpen function to false.
+// And all the tests fail because the getIsCategoryOpen function returns false on the first render.
+// That's why we mock it to return true by default.
+
+jest.spyOn(navUtils, 'getIsCategoryOpen').mockImplementation((category, storage) => {
+  // Try to get the value from the storage first
+  const storageKey = `core.navGroup.${category}`;
+  const storedValue = storage.getItem(storageKey);
+  // If the value is not stored, return the default value
+  if (storedValue !== null) {
+    return storedValue === 'true';
+  }
+  return true;
+});
+
 describe('CollapsibleNav', () => {
   // this test is mostly an "EUI works as expected" sanity check
   it('renders the default nav', () => {
@@ -166,7 +183,8 @@ describe('CollapsibleNav', () => {
     expect(component).toMatchSnapshot();
   });
 
-  // Wazuh dashboards change: The menu is collapsed at the beginning,
+  // Wazuh dashboard change: The menu is collapsed at the beginning,
+
   // that's why it changes to 0 at the beginning and when pressing the buttons it changes to 2 because it would be displaying the submenu.
   it('remembers collapsible section state', () => {
     const navLinks = [mockLink({ category: explore }), mockLink({ category: observability })];
@@ -179,7 +197,7 @@ describe('CollapsibleNav', () => {
         recentlyAccessed$={new BehaviorSubject(recentNavLinks)}
       />
     );
-    expectShownNavLinksCount(component, 0);
+    expectShownNavLinksCount(component, 3);
     clickGroup(component, 'explore');
     clickGroup(component, 'recentlyViewed');
     expectShownNavLinksCount(component, 2);

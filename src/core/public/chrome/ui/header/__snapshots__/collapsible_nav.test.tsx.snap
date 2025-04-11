@@ -820,7 +820,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
               data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
               iconType="/test/ui/logos/wazuh_mark_on_light.svg"
-              initialIsOpen={false}
+              initialIsOpen={true}
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
@@ -868,7 +868,7 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
@@ -5985,7 +5985,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
               data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_dark.svg"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
               iconType="/test/ui/logos/wazuh_mark_on_dark.svg"
-              initialIsOpen={false}
+              initialIsOpen={true}
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
@@ -6033,7 +6033,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_dark.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
@@ -7093,7 +7093,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
               data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
               data-test-subj="collapsibleNavGroup-opensearchDashboards"
               iconType="/test/ui/logos/wazuh_mark_on_light.svg"
-              initialIsOpen={false}
+              initialIsOpen={true}
               isCollapsible={true}
               key="opensearchDashboards"
               onToggle={[Function]}
@@ -7141,7 +7141,7 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
                 paddingSize="none"
               >
                 <div
-                  className="euiAccordion euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
+                  className="euiAccordion euiAccordion-isOpen euiCollapsibleNavGroup euiCollapsibleNavGroup--withHeading"
                   data-test-opensearch-logo="/test/ui/logos/wazuh_mark_on_light.svg"
                   data-test-subj="collapsibleNavGroup-opensearchDashboards"
                   onToggle={[Function]}
