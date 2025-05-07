@@ -5,14 +5,6 @@ name: Build and test
 
 # trigger on every commit push and PR for all branches except feature branches and pushes for backport branches
 on:
-  push:
-    branches: ['**', '!feature/**', '!backport/**']
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
   pull_request:
     branches: ['**', '!feature/**']
     paths-ignore:
