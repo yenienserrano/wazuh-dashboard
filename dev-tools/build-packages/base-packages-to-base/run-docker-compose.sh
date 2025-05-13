@@ -4,7 +4,7 @@ export WAZUH_DASHBOARD_PLUGINS_BRANCH=""
 export WAZUH_DASHBOARD_BRANCH=""
 export WAZUH_SECURITY_PLUGIN_BRANCH=""
 export ARCHITECTURE="amd"
-export NODE_VERSION="18.19.0"
+export NODE_VERSION="20.18.3"
 
 
 run_docker_compose() {

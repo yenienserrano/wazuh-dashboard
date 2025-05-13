@@ -68,6 +68,8 @@ export const IGNORE_FILE_GLOBS = [
   // TODO fix file names in APM to remove these
   'dev-tools/**/*',
   // packages for the ingest manager's api integration tests could be valid semver which has dashes
+
+  'VERSION.json',
 ];
 
 /**
