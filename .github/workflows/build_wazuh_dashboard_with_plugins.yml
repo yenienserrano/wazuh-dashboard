@@ -111,7 +111,7 @@ jobs:
     #   - Final package name based on system, architecture and stage.
     #   - Architecture flags.
     #   - Version, revision and commit SHA information.
-    runs-on: ubuntu-24.04
+    runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     name: Setup variables
     outputs:
       CURRENT_DIR: ${{ steps.setup-variables.outputs.CURRENT_DIR }}
@@ -165,6 +165,21 @@ jobs:
         run: |
           CURRENT_DIR=$(pwd -P)
           VERSION=$(jq -r '.version' VERSION.json)
+          # Check the corresponding previous version to be used in the upgrade test
+          sudo curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && sudo chmod 644 /usr/share/keyrings/wazuh.gpg
+          sudo echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | sudo tee -a /etc/apt/sources.list.d/wazuh.list
+          sudo apt-get update
+          PREVIOUS=$(apt-cache madison wazuh-dashboard | grep -A 1 "$VERSION" | tail -1 | awk '{print $3}')
+          if [ -z "$PREVIOUS" ]; then
+            MAJOR_MINOR=$(echo "$VERSION" | cut -d '.' -f 1,2)$(echo ".")
+            PREVIOUS=$(apt-cache madison wazuh-dashboard | grep "$MAJOR_MINOR" | head -1 | awk '{print $3}')
+          fi
+          if [ -z "$PREVIOUS" ]; then
+            PREVIOUS=$(apt-cache madison wazuh-dashboard | head -1 | awk '{print $3}')
+          fi
+          if [ -z "$PREVIOUS" ]; then
+            echo "::warning No previous version::No previous version found for this architecture. Upgrade test will be skipped."
+          fi
           REVISION=$(yarn --silent wzd-revision)
           COMMIT_SHA=$(git rev-parse --short HEAD)
           PLUGINS_SHA=${{steps.get-plugins-sha.outputs.WAZUH_PLUGINS_SHA}}
@@ -280,7 +295,7 @@ jobs:
     # 7. Finally, upload the resulting package as an artifact.
     needs:
       [setup-variables, build-main-plugins, build-base, build-security-plugin, build-report-plugin]
-    runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'wz-linux-arm64' || 'ubuntu-22.04' }}
+    runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     name: Generate packages
     steps:
       - name: Checkout code
