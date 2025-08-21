@@ -277,6 +277,15 @@ jobs:
             -b file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/dashboard-package.zip \
             --${{ inputs.system }} ${{ needs.setup-variables.outputs.PRODUCTION }}
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}
+          path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/build-packages/output/${{needs.setup-variables.outputs.PACKAGE_NAME}}
+          retention-days: 30
+          overwrite: true
+
       - name: Test package
         run: |
           cd ${{ needs.setup-variables.outputs.CURRENT_DIR }}/dev-tools/test-packages
