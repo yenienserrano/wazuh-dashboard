@@ -9,6 +9,7 @@ revision="1"
 security=""
 ml=""
 reportPlugin=""
+securityAnalytics=""
 version="$(jq -r '.version' ${root_dir}/VERSION.json)"
 all_platforms="no"
 deb="no"
@@ -180,7 +181,8 @@ help() {
     echo "    -a,  --app <url/path>           Set the location of the .zip file containing the Wazuh plugin."
     echo "    -b,  --base <url/path>          Set the location of the .tar.gz file containing the base wazuh-dashboard build."
     echo "    -s,  --security <url/path>      Set the location of the .zip file containing the wazuh-security-dashboards-plugin."
-    echo "    -ml, --ml <url/path>          Set the location of the .zip file containing the wazuh-dashboard-ml-commons plugin."
+    echo "    -ml, --ml <url/path>            Set the location of the .zip file containing the wazuh-dashboard-ml-commons plugin."
+    echo "    -sa, --securityAnalytics <url/path>          Set the location of the .zip file containing the wazuh-dashboard-security-analytics plugin."
     echo "    -rp, --reportPlugin <url/path>  Set the location of the .zip file containing the wazuh-reporting-plugin."
     echo "    -r,  --revision <revision>      [Optional] Set the revision of this build. By default, it is set to 1."
     echo "         --all-platforms            Build for all platforms."
@@ -254,6 +256,14 @@ main() {
                 help 0
             fi
             ;;
+        "-sa" | "--securityAnalytics")
+            if [ -n "${2}" ]; then
+                securityAnalytics="${2}"
+                shift 2
+            else
+                help 0
+            fi
+            ;;
         "-r" | "--revision")
             if [ -n "${2}" ]; then
                 revision="${2}"
@@ -300,8 +310,8 @@ main() {
         esac
     done
 
-    if [ -z "$app" ] || [ -z "$base" ] || [ -z "$security" ] || [ -z "$reportPlugin" ] || [ -z "$ml" ]; then
-        echo "You must specify the app, base, security, reportPlugin, and ml."
+    if [ -z "$app" ] || [ -z "$base" ] || [ -z "$security" ] || [ -z "$reportPlugin" ] || [ -z "$ml" ] || [ -z "$securityAnalytics" ]; then
+        echo "You must specify the app, base, security, reportPlugin, ml, and securityAnalytics."
         help 1
     fi
 
