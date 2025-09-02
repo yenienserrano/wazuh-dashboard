@@ -7,6 +7,7 @@ app=""
 base=""
 revision="1"
 security=""
+ml=""
 reportPlugin=""
 version="$(jq -r '.version' ${root_dir}/VERSION.json)"
 all_platforms="no"
@@ -53,8 +54,8 @@ ctrl_c() {
 }
 
 get_packages(){
-  packages_list=(app base security reportPlugin)
-  packages_names=("Wazuh plugins" "Wazuh Dashboard" "Security plugin" "Report plugin")
+  packages_list=(app base security ml)
+  packages_names=("Wazuh plugins" "Wazuh Dashboard" "Security plugin" "ML Commons plugin")
   valid_url='(https?|ftp|file)://[-[:alnum:]\+&@#/%?=~_|!:,.;]*[-[:alnum:]\+&@#/%=~_|]'
   mkdir -p ${tmp_dir}
   cd ${tmp_dir}
@@ -179,6 +180,7 @@ help() {
     echo "    -a,  --app <url/path>           Set the location of the .zip file containing the Wazuh plugin."
     echo "    -b,  --base <url/path>          Set the location of the .tar.gz file containing the base wazuh-dashboard build."
     echo "    -s,  --security <url/path>      Set the location of the .zip file containing the wazuh-security-dashboards-plugin."
+    echo "    -ml, --ml <url/path>          Set the location of the .zip file containing the wazuh-dashboard-ml-commons plugin."
     echo "    -rp, --reportPlugin <url/path>  Set the location of the .zip file containing the wazuh-reporting-plugin."
     echo "    -r,  --revision <revision>      [Optional] Set the revision of this build. By default, it is set to 1."
     echo "         --all-platforms            Build for all platforms."
@@ -223,6 +225,14 @@ main() {
         "-s" | "--security")
             if [ -n "${2}" ]; then
                 security="${2}"
+                shift 2
+            else
+                help 0
+            fi
+            ;;
+        "-ml" | "--ml")
+            if [ -n "${2}" ]; then
+                ml="${2}"
                 shift 2
             else
                 help 0
@@ -290,8 +300,8 @@ main() {
         esac
     done
 
-    if [ -z "$app" ] || [ -z "$base" ] || [ -z "$security" ] || [ -z "$reportPlugin" ]; then
-        echo "You must specify the app, base, and security."
+    if [ -z "$app" ] || [ -z "$base" ] || [ -z "$security" ] || [ -z "$reportPlugin" ] || [ -z "$ml" ]; then
+        echo "You must specify the app, base, security, reportPlugin, and ml."
         help 1
     fi
 
