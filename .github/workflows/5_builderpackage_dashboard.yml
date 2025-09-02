@@ -65,11 +65,11 @@ on:
         description: 'Branch/tag/commit of the wazuh-dashboard-ml-commons repository to build the ML plugin'
         required: true
         default: 'main'
-      reference_security_analytics_plugins:
-        type: string
-        description: 'Branch/tag/commit of the wazuh-dashboard-security-analytics repository to build the Security Analytics plugin'
-        required: true
-        default: 'main'
+      # reference_security_analytics_plugins:
+      #   type: string
+      #   description: 'Branch/tag/commit of the wazuh-dashboard-security-analytics repository to build the Security Analytics plugin'
+      #   required: true
+      #   default: 'main'
       is_stage:
         type: boolean
         description: 'Set production nomenclature'
@@ -115,10 +115,10 @@ on:
         type: string
         required: true
         default: 'main'
-      reference_security_analytics_plugins:
-        type: string
-        required: true
-        default: 'main'
+      # reference_security_analytics_plugins:
+      #   type: string
+      #   required: true
+      #   default: 'main'
       is_stage:
         type: boolean
         required: true
@@ -157,7 +157,7 @@ jobs:
       WAZUH_PLUGINS_CHECK_UPDATES: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
       WAZUH_REPORT_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
       WAZUH_ML_COMMONS_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_ML_COMMONS_PLUGIN }}
-      WAZUH_SECURITY_ANALYTICS_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_SECURITY_ANALYTICS_PLUGIN }}
+      WAZUH_SECURITY_ANALYTICS_PLUGIN: ${{ steps.setup-variables.outputs.reference_ml_commons_plugins }}
       PACKAGE_NAME: ${{ steps.setup-variables.outputs.PACKAGE_NAME }}
       ARCHITECTURE_FLAG: ${{ steps.setup-variables.outputs.ARCHITECTURE_FLAG }}
     steps:
@@ -201,7 +201,7 @@ jobs:
       - name: Get SHA of wazuh-dashboard-security-analytics
         id: get-security-analytics-sha
         run: |
-          git clone -b ${{ inputs.reference_security_analytics_plugins }} --single-branch https://github.com/wazuh/wazuh-dashboard-security-analytics.git wzsa
+          git clone -b ${{ inputs.reference_ml_commons_plugins }} --single-branch https://github.com/wazuh/wazuh-dashboard-security-analytics.git wzsa
           cd wzsa
           echo "WAZUH_SECURITY_ANALYTICS_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
@@ -240,7 +240,7 @@ jobs:
           WAZUH_DASHBOARD_SLIM=wazuh-dashboard_${VERSION}-${REVISION}_${{ (inputs.ARCHITECTURE == 'x86_64' || inputs.ARCHITECTURE == 'amd64') && 'x64' || 'arm64' }}.tar.gz
           WAZUH_SECURITY_PLUGIN=wazuh-security-dashboards-plugin_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_security_plugins }} | sed 's/\//-/g').zip
           WAZUH_ML_COMMONS_PLUGIN=wazuh-ml-commons-plugin_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_ml_commons_plugins }} | sed 's/\//-/g').zip
-          WAZUH_SECURITY_ANALYTICS_PLUGIN=wazuh-security-analytics-plugin_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_security_analytics_plugins }} | sed 's/\//-/g').zip
+          WAZUH_SECURITY_ANALYTICS_PLUGIN=wazuh-security-analytics-plugin_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_ml_commons_plugins }} | sed 's/\//-/g').zip
           WAZUH_REPORT_PLUGIN=reports-dashboards_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_report_plugins }} | sed 's/\//-/g').zip
           WAZUH_PLUGINS_WAZUH=wazuh-dashboard-plugins_wazuh_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
           WAZUH_PLUGINS_CORE=wazuh-dashboard-plugins_wazuh-core_${VERSION}-${REVISION}_$(echo ${{ inputs.reference_wazuh_plugins }} | sed 's/\//-/g').zip
@@ -358,7 +358,7 @@ jobs:
       pull-requests: write
     uses: wazuh/wazuh-dashboard-security-analytics/.github/workflows/5_builderpackage_security_analytics_plugin.yml@main
     with:
-      reference: ${{ inputs.reference_security_analytics_plugins }}
+      reference: ${{ inputs.reference_ml_commons_plugins }}
 
   build-package:
     needs:
