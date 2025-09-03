@@ -28,6 +28,7 @@ USER node
 ADD ./clone-plugins.sh /home/node/clone-plugins.sh
 ADD ./repositories/wazuh-dashboard.sh /home/node/repositories/wazuh-dashboard.sh
 ADD ./repositories/plugins/wazuh-dashboard-ml-commons.sh /home/node/repositories/plugins/wazuh-dashboard-ml-commons.sh
+ADD ./repositories/plugins/wazuh-dashboard-security-analytics.sh /home/node/repositories/plugins/wazuh-dashboard-security-analytics.sh
 ADD ./repositories/plugins/wazuh-security-dashboards-plugin.sh /home/node/repositories/plugins/wazuh-security-dashboards-plugin.sh
 ADD ./repositories/plugins/wazuh-dashboard-reporting.sh /home/node/repositories/plugins/wazuh-dashboard-reporting.sh
 ADD ./repositories/plugins/wazuh-dashboard-plugins.sh /home/node/repositories/plugins/wazuh-dashboard-plugins.sh
