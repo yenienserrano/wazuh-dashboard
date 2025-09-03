@@ -158,7 +158,7 @@ jobs:
       WAZUH_PLUGINS_CHECK_UPDATES: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
       WAZUH_REPORT_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
       WAZUH_ML_COMMONS_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_ML_COMMONS_PLUGIN }}
-      WAZUH_SECURITY_ANALYTICS_PLUGIN: ${{ steps.setup-variables.outputs.reference_ml_commons_plugins }}
+      WAZUH_SECURITY_ANALYTICS_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_SECURITY_ANALYTICS_PLUGIN }}
       PACKAGE_NAME: ${{ steps.setup-variables.outputs.PACKAGE_NAME }}
       ARCHITECTURE_FLAG: ${{ steps.setup-variables.outputs.ARCHITECTURE_FLAG }}
     steps:
