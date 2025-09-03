@@ -149,6 +149,7 @@ jobs:
       SECURITY_SHA: ${{ steps.setup-variables.outputs.SECURITY_SHA }}
       REPORTING_SHA: ${{ steps.setup-variables.outputs.REPORTING_SHA }}
       ML_COMMONS_SHA: ${{ steps.setup-variables.outputs.ML_COMMONS_SHA }}
+      SECURITY_ANALYTICS_SHA: ${{ steps.setup-variables.outputs.SECURITY_ANALYTICS_SHA }}
       PRODUCTION: ${{ steps.setup-variables.outputs.PRODUCTION }}
       WAZUH_DASHBOARD_SLIM: ${{ steps.setup-variables.outputs.WAZUH_DASHBOARD_SLIM }}
       WAZUH_SECURITY_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
@@ -271,6 +272,7 @@ jobs:
           echo "PLUGINS_SHA=$PLUGINS_SHA" >> $GITHUB_OUTPUT
           echo "SECURITY_SHA=$SECURITY_SHA" >> $GITHUB_OUTPUT
           echo "ML_COMMONS_SHA=$ML_COMMONS_SHA" >> $GITHUB_OUTPUT
+          echo "SECURITY_ANALYTICS_SHA=$SECURITY_ANALYTICS_SHA" >> $GITHUB_OUTPUT
           echo "REPORTING_SHA=$REPORTING_SHA" >> $GITHUB_OUTPUT
           echo "PRODUCTION=$PRODUCTION" >> $GITHUB_OUTPUT
           echo "WAZUH_DASHBOARD_SLIM=$WAZUH_DASHBOARD_SLIM" >> $GITHUB_OUTPUT
