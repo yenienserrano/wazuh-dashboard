@@ -359,12 +359,12 @@ jobs:
             exit 1
           fi
 
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
-          aws-region: ${{ secrets.CI_AWS_REGION }}
+      # - name: Set up AWS CLI
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
+      #     aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
+      #     aws-region: ${{ secrets.CI_AWS_REGION }}
 
   build_plugins:
     name: Build Plugin ${{ matrix.plugin.name }}
@@ -373,12 +373,22 @@ jobs:
       [
         setup-variables,
       ]
+    env:
+      PLUGIN_REF: ${{ inputs.reference_plugins }}
     strategy:
       fail-fast: false
       matrix:
         plugin:
+          - name: wazuhDashboard
+            repo: wazuh/wazuh-dashboard
           - name: reportsDashboards
-            repo: opensearch-project/dashboards-reporting
+            repo: wazuh/wazuh-dashboard-reporting
+          - name: securityDashboards
+            repo: wazuh/wazuh-security-dashboards-plugin
+          - name: mlCommons
+            repo: wazuh/wazuh-dashboard-ml-commons
+          - name: securityAnalytics
+            repo: wazuh/wazuh-dashboard-security-analytics
 
     steps:
       - name: Checkout OpenSearch Dashboards
@@ -393,22 +403,56 @@ jobs:
       - name: Install Yarn
         run: npm install -g yarn@^1.22.10
 
+      - name: Build Wazuh Dashboard
+        if: ${{matrix.plugin.name == 'wazuhDashboard'}}
+        uses: ./.github/workflows/5_builderpackage_dashboard_core.yml
+        with:
+          CHECKOUT_TO: ${{  github.ref_name }}
+          ARCHITECTURE: ${{ inputs.architecture }}
+
+      - name: Check if plugin reference exists or use github.ref_name
+        if: ${{matrix.plugin.name != 'wazuhDashboard'}}
+        run: |
+          if [ -z "${{ inputs.reference_plugins }}" ]; then
+            echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
+            echo "PLUGIN_REF=${{ github.ref_name }}" >> $GITHUB_ENV
+          else
+            if [ "$(git ls-remote https://github.com/${{matrix.plugin.repo}}.git ${{ inputs.reference_plugins }})" ]; then
+              echo "Plugin reference ${{ inputs.reference_plugins }} exists."
+              PLUGIN_REF=${{ inputs.reference_plugins }}
+            else
+              echo "Plugin reference ${{ inputs.reference_plugins }} does not exist, trying with github.ref_name: ${{ github.ref_name }}"
+              if [ "$(git ls-remote https://github.com/${{matrix.plugin.repo}}.git ${{ github.ref_name }})" ]; then
+                echo "Plugin reference ${{ github.ref_name }} exists."
+                PLUGIN_REF=${{ github.ref_name }}
+              else
+                echo "Plugin reference ${{ github.ref_name }} does not exist. Please check if the reference is correct."
+                exit 1
+              fi
+            fi
+
+            echo "PLUGIN_REF=$PLUGIN_REF" >> $GITHUB_ENV
+          fi
+
       - name: Checkout Plugin
+        if: ${{matrix.plugin.name != 'wazuhDashboard'}}
         uses: actions/checkout@v4
         with:
           repository: ${{ matrix.plugin.repo }}
-          ref: ${{ inputs.reference_plugins }}
+          ref: ${{ env.PLUGIN_REF }}
           path: plugins/${{ matrix.plugin.name }}
 
       - name: Bootstrap with Plugins
+        if: ${{matrix.plugin.name != 'wazuhDashboard'}}
         run: yarn osd bootstrap --single-version=loose
 
       - name: Build Plugin
+        if: ${{matrix.plugin.name != 'wazuhDashboard'}}
         working-directory: plugins/${{ matrix.plugin.name }}
         run: node ../../scripts/plugin_helpers build --opensearch-dashboards-version=${{ needs.setup-variables.outputs.VERSION_OPENSEARCH }} 2>&1 | tee build.log
 
       - name: Upload Plugin Artifact
-        if: success()
+        if: ${{matrix.plugin.name != 'wazuhDashboard'}} && success()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.plugin.name }}-${{ needs.setup-variables.outputs.VERSION_OPENSEARCH }}
@@ -416,7 +460,7 @@ jobs:
           retention-days: 1
 
       - name: Upload Build Log
-        if: failure()
+        if: ${{matrix.plugin.name != 'wazuhDashboard'}} && failure()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.plugin.name }}-${{ needs.setup-variables.outputs.VERSION_OPENSEARCH }}-failed-log
@@ -427,6 +471,7 @@ jobs:
     needs:
       [
         setup-variables,
+        build_plugins
       ]
     runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     name: Generate packages
@@ -713,42 +758,42 @@ jobs:
             python3 modules/allocation/main.py --action delete --track-output "/tmp/track.yaml"
           fi
 
-  upload-package:
-    needs: [setup-variables, test-package]
-    runs-on: ${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    name: Upload package
-    steps:
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
-          aws-region: ${{ secrets.CI_AWS_REGION }}
+  # upload-package:
+  #   needs: [setup-variables, test-package]
+  #   runs-on: ${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+  #   name: Upload package
+  #   steps:
+  #     - name: Set up AWS CLI
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
+  #         aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
+  #         aws-region: ${{ secrets.CI_AWS_REGION }}
 
-      - name: Download  artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}
-          path: ./
+  #     - name: Download  artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}
+  #         path: ./
 
-      - name: Download  checksum
-        if: ${{ inputs.checksum }}
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512
-          path: ./
+  #     - name: Download  checksum
+  #       if: ${{ inputs.checksum }}
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512
+  #         path: ./
 
-      - name: Upload package
-        run: |
-          echo "Uploading package"
-          aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}} s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
-          s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}"
-          echo "S3 URI: ${s3uri}"
+  #     - name: Upload package
+  #       run: |
+  #         echo "Uploading package"
+  #         aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}} s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
+  #         s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}"
+  #         echo "S3 URI: ${s3uri}"
 
-      - name: Upload SHA512
-        if: ${{ inputs.checksum }}
-        run: |
-          echo "Uploading checksum"
-          aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512 s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
-          s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512"
-          echo "S3 sha512 URI: ${s3uri}"
+  #     - name: Upload SHA512
+  #       if: ${{ inputs.checksum }}
+  #       run: |
+  #         echo "Uploading checksum"
+  #         aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512 s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
+  #         s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512"
+  #         echo "S3 sha512 URI: ${s3uri}"
