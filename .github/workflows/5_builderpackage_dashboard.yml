@@ -163,7 +163,7 @@ jobs:
             if [ -z "$SHA" ]; then
               echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
               SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
-              $REFERENCE="${{ github.ref_name }}"
+              REFERENCE="${{ github.ref_name }}"
             fi
             if [ -z "$SHA" ]; then
               echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
@@ -193,6 +193,7 @@ jobs:
             if [ -z "$SHA" ]; then
               echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
               SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
+              REFERENCE="${{ github.ref_name }}"
             fi
             if [ -z "$SHA" ]; then
               echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
@@ -218,6 +219,7 @@ jobs:
             if [ -z "$SHA" ]; then
               echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
               SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
+              REFERENCE="${{ github.ref_name }}"
             fi
             if [ -z "$SHA" ]; then
               echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
@@ -243,6 +245,7 @@ jobs:
             if [ -z "$SHA" ]; then
               echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
               SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
+              REFERENCE="${{ github.ref_name }}"
             fi
             if [ -z "$SHA" ]; then
               echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
@@ -268,6 +271,7 @@ jobs:
             if [ -z "$SHA" ]; then
               echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
               SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
+              REFERENCE="${{ github.ref_name }}"
             fi
             if [ -z "$SHA" ]; then
               echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
