@@ -154,24 +154,25 @@ jobs:
           if [ -z "$REFERENCE" ]; then
             echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
             REFERENCE="${{ github.ref_name }}"
-            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
-            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
-            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
+            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
+            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
           else
             echo "Using reference: $REFERENCE"
             SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
             if [ -z "$SHA" ]; then
               echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
-              SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
               REFERENCE="${{ github.ref_name }}"
+              SHA=$(git ls-remote $REPOSITORY $REFERENCE | cut -f1 | cut -c1-7)
             fi
-            if [ -z "$SHA" ]; then
-              echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
-              exit 1
-            fi
-            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
-            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
-            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
+            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+          fi
+          if [ -z "$SHA" ]; then
+            echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
+            exit 1
           fi
           echo "WAZUH_PLUGINS_NAME_WAZUH=$NAME_PLUGIN_WAZUH" >> $GITHUB_OUTPUT
           echo "WAZUH_PLUGINS_NAME_CORE=$NAME_PLUGIN_CORE" >> $GITHUB_OUTPUT
@@ -186,6 +187,7 @@ jobs:
           if [ -z "$REFERENCE" ]; then
             echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
             REFERENCE="${{ github.ref_name }}"
+            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
             WAZUH_SECURITY_PLUGIN=wazuh-security-dashboards-plugin_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
           else
             echo "Using reference: $REFERENCE"
@@ -195,11 +197,11 @@ jobs:
               SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
               REFERENCE="${{ github.ref_name }}"
             fi
-            if [ -z "$SHA" ]; then
-              echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
-              exit 1
-            fi
             WAZUH_SECURITY_PLUGIN=wazuh-security-dashboards-plugin_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+          fi
+          if [ -z "$SHA" ]; then
+            echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
+            exit 1
           fi
           echo "WAZUH_SECURITY_PLUGIN=$WAZUH_SECURITY_PLUGIN" >> $GITHUB_OUTPUT
           echo "WAZUH_SECURITY_SHA=$SHA" >> $GITHUB_OUTPUT
@@ -212,20 +214,21 @@ jobs:
           if [ -z "$REFERENCE" ]; then
             echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
             REFERENCE="${{ github.ref_name }}"
+            SHA=$(git ls-remote $REPOSITORY $REFERENCE | cut -f1 | cut -c1-7)
             WAZUH_REPORTING_PLUGIN=reports-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
           else
             echo "Using reference: $REFERENCE"
-            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
+            SHA=$(git ls-remote $REPOSITORY $REFERENCE | cut -f1 | cut -c1-7)
             if [ -z "$SHA" ]; then
               echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
-              SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
               REFERENCE="${{ github.ref_name }}"
-            fi
-            if [ -z "$SHA" ]; then
-              echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
-              exit 1
+              SHA=$(git ls-remote $REPOSITORY $REFERENCE | cut -f1 | cut -c1-7)
             fi
             WAZUH_REPORTING_PLUGIN=reports-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+          fi
+          if [ -z "$SHA" ]; then
+            echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
+            exit 1
           fi
           echo "WAZUH_REPORTING_PLUGIN=$WAZUH_REPORTING_PLUGIN" >> $GITHUB_OUTPUT
           echo "WAZUH_REPORTING_SHA=$SHA" >> $GITHUB_OUTPUT
@@ -238,6 +241,7 @@ jobs:
           if [ -z "$REFERENCE" ]; then
             echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
             REFERENCE="${{ github.ref_name }}"
+            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
             WAZUH_ML_COMMONS_PLUGIN=ml-commons-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
           else
             echo "Using reference: $REFERENCE"
@@ -247,11 +251,11 @@ jobs:
               SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
               REFERENCE="${{ github.ref_name }}"
             fi
-            if [ -z "$SHA" ]; then
-              echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
-              exit 1
-            fi
             WAZUH_ML_COMMONS_PLUGIN=ml-commons-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+          fi
+          if [ -z "$SHA" ]; then
+            echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
+            exit 1
           fi
           echo "WAZUH_ML_COMMONS_PLUGIN=$WAZUH_ML_COMMONS_PLUGIN" >> $GITHUB_OUTPUT
           echo "ML_COMMONS_SHA=$SHA" >> $GITHUB_OUTPUT
@@ -264,6 +268,7 @@ jobs:
           if [ -z "$REFERENCE" ]; then
             echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
             REFERENCE="${{ github.ref_name }}"
+            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
             WAZUH_SECURITY_ANALYTICS_PLUGIN=security-analytics-dashboards_${VERSION}-${REVISION}_$(echo ${{ github.ref_name }} | sed 's/\//-/g').zip
           else
             echo "Using reference: $REFERENCE"
@@ -273,11 +278,11 @@ jobs:
               SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
               REFERENCE="${{ github.ref_name }}"
             fi
-            if [ -z "$SHA" ]; then
-              echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
-              exit 1
-            fi
             WAZUH_SECURITY_ANALYTICS_PLUGIN=security-analytics-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+          fi
+          if [ -z "$SHA" ]; then
+            echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
+            exit 1
           fi
           echo "WAZUH_SECURITY_ANALYTICS_PLUGIN=$WAZUH_SECURITY_ANALYTICS_PLUGIN" >> $GITHUB_OUTPUT
           echo "WAZUH_SECURITY_ANALYTICS_SHA=$SHA" >> $GITHUB_OUTPUT
