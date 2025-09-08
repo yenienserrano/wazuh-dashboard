@@ -154,9 +154,9 @@ jobs:
           if [ -z "$REFERENCE" ]; then
             echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
             REFERENCE="${{ github.ref_name }}"
-            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
+            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
+            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
           else
             echo "Using reference: $REFERENCE"
             SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
@@ -169,9 +169,9 @@ jobs:
               echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
               exit 1
             fi
-            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
+            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
+            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo "$REFERENCE" | sed 's/\//-/g').zip
           fi
           echo "WAZUH_PLUGINS_NAME_WAZUH=$NAME_PLUGIN_WAZUH" >> $GITHUB_OUTPUT
           echo "WAZUH_PLUGINS_NAME_CORE=$NAME_PLUGIN_CORE" >> $GITHUB_OUTPUT
