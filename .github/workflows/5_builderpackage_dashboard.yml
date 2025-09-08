@@ -141,7 +141,7 @@ jobs:
         run: |
           SHA=$(git ls-remote https://github.com/wazuh/wazuh-dashboard-plugins.git ${{ inputs.reference_plugins }} | cut -f1 | cut -c1-7)
 
-          if [ -z "$BRANCH" ] || [ "$SHA" = "" ]; then
+          if [ -z "${{ inputs.reference_plugins }}" ] || [ "$SHA" = "" ]; then
             SHA=$(git ls-remote https://github.com/wazuh/wazuh-dashboard-plugins.git $BRANCH | cut -f1 | cut -c1-7)
           fi
 
