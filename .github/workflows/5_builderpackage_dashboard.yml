@@ -391,8 +391,10 @@ jobs:
             repo: wazuh/wazuh-dashboard-security-analytics
 
     steps:
-      - name: Checkout OpenSearch Dashboards
+      - name: Checkout Wazuh Dashboards
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
