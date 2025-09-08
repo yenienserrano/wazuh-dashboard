@@ -120,7 +120,7 @@ jobs:
       WAZUH_PLUGINS_WAZUH: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_WAZUH }}
       WAZUH_PLUGINS_CORE: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
       WAZUH_PLUGINS_CHECK_UPDATES: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
-      WAZUH_REPORT_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
+      WAZUH_REPORTING_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_REPORTING_PLUGIN }}
       WAZUH_ML_COMMONS_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_ML_COMMONS_PLUGIN }}
       WAZUH_SECURITY_ANALYTICS_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_SECURITY_ANALYTICS_PLUGIN }}
       PACKAGE_NAME: ${{ steps.setup-variables.outputs.PACKAGE_NAME }}
@@ -174,9 +174,9 @@ jobs:
             echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
             exit 1
           fi
-          echo "WAZUH_PLUGINS_NAME_WAZUH=$NAME_PLUGIN_WAZUH" >> $GITHUB_OUTPUT
-          echo "WAZUH_PLUGINS_NAME_CORE=$NAME_PLUGIN_CORE" >> $GITHUB_OUTPUT
-          echo "WAZUH_PLUGINS_NAME_CHECK_UPDATES=$NAME_PLUGIN_CHECK_UPDATES" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_WAZUH=$NAME_PLUGIN_WAZUH" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_CORE=$NAME_PLUGIN_CORE" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_CHECK_UPDATES=$NAME_PLUGIN_CHECK_UPDATES" >> $GITHUB_OUTPUT
           echo "WAZUH_PLUGINS_SHA=$SHA" >> $GITHUB_OUTPUT
 
       - name: Get outputs of wazuh-security-dashboards-plugin
@@ -355,10 +355,10 @@ jobs:
           echo "WAZUH_ML_COMMONS_PLUGIN=${{steps.get-ml.outputs.WAZUH_ML_COMMONS_PLUGIN}}" >> $GITHUB_OUTPUT
           echo "WAZUH_SECURITY_ANALYTICS_PLUGIN=${{steps.get-security-analytics.outputs.WAZUH_SECURITY_ANALYTICS_PLUGIN}}" >> $GITHUB_OUTPUT
           echo "WAZUH_SECURITY_PLUGIN=${{steps.get-security.outputs.WAZUH_SECURITY_PLUGIN}}" >> $GITHUB_OUTPUT
-          echo "WAZUH_REPORT_PLUGIN=${{steps.get-reporting.outputs.WAZUH_REPORT_PLUGIN}}" >> $GITHUB_OUTPUT
+          echo "WAZUH_REPORTING_PLUGIN=${{steps.get-reporting.outputs.WAZUH_REPORTING_PLUGIN}}" >> $GITHUB_OUTPUT
           echo "WAZUH_PLUGINS_WAZUH=${{steps.get-plugins.outputs.WAZUH_PLUGINS_WAZUH}}" >> $GITHUB_OUTPUT
           echo "WAZUH_PLUGINS_CORE=${{steps.get-plugins.outputs.WAZUH_PLUGINS_CORE}}" >> $GITHUB_OUTPUT
-          echo "WAZUH_PLUGINS_CHECK_UPDATES=$WAZUH_PLUGINS_CHECK_UPDATES" >> $GITHUB_OUTPUT
+          echo "WAZUH_PLUGINS_CHECK_UPDATES=${{steps.get-plugins.outputs.WAZUH_PLUGINS_CHECK_UPDATES}}" >> $GITHUB_OUTPUT
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_OUTPUT
           echo "ARCHITECTURE_FLAG=$ARCHITECTURE_FLAG" >> $GITHUB_OUTPUT
 
@@ -510,7 +510,7 @@ jobs:
         plugin:
           - name: reports-dashboards
             repo: wazuh/wazuh-dashboard-reporting
-            namePackage: ${{ needs.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
+            namePackage: ${{ needs.setup-variables.outputs.WAZUH_REPORTING_PLUGIN }}
           - name: wazuh-security-dashboards-plugin
             repo: wazuh/wazuh-security-dashboards-plugin
             namePackage: ${{ needs.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
@@ -589,7 +589,6 @@ jobs:
           path: plugins/${{ matrix.plugin.name }}/build.log
           retention-days: 1
 
-  
   build-package:
     needs:
       [
@@ -640,7 +639,7 @@ jobs:
       - name: Download report plugin artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup-variables.outputs.WAZUH_REPORT_PLUGIN }}
+          name: ${{ needs.setup-variables.outputs.WAZUH_REPORTING_PLUGIN }}
           path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/report-plugin
       - name: Download ml commons plugin artifact
         uses: actions/download-artifact@v4
