@@ -153,7 +153,7 @@ jobs:
           - name: plugins
             packageName: wazuh-dashboard-plugins
             repository: https://github.com/wazuh/wazuh-dashboard-plugins.git
-            outputNamePackage: WAZUH_PLUGINS_PLUGIN # this is just a placeholder, not used in this case because all three names are generated in the run step, if we need to add more plugins in this repo we add more on the run step
+            outputNamePackage: WAZUH_PLUGINS_PLUGIN # this not used in this case because all three names are generated in the run step, if we need to add more plugins in this repo we add more on the run step
             outputSHA: WAZUH_PLUGINS_SHA
           - name: reporting
             packageName: wazuh-dashboard-reporting
@@ -334,208 +334,59 @@ jobs:
       ARCHITECTURE: ${{ inputs.architecture }}
 
   build-plugins:
-    name: Build Plugin ${{ matrix.plugin.name }}
-    runs-on: ubuntu-latest
     needs:
       [
         setup-variables,
         validate-job,
         get-outputs-plugins
       ]
-    env:
-      PLUGIN_REF: ${{ inputs.reference_plugins }}
-    strategy:
-      fail-fast: false
-      matrix:
-        plugin:
-          - name: wazuh-dashboard-plugins_wazuh
-            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_WAZUH }}
-            path: plugins/main
-            repo: wazuh/wazuh-dashboard-plugins
-          - name: wazuh-dashboard-plugins_wazuh-check-updates
-            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_CHECK_UPDATES }}
-            path: plugins/wazuh-check-updates
-            repo: wazuh/wazuh-dashboard-plugins
-          - name: wazuh-dashboard-plugins_wazuh-core
-            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_CORE }}
-            path: plugins/wazuh-core
-            repo: wazuh/wazuh-dashboard-plugins
-
-    steps:
-      - name: Checkout Wazuh Dashboards
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Install Yarn
-        run: npm install -g yarn@^1.22.10
-
-      - name: Check if plugin reference exists or use github.ref_name
-        run: |
-          if [ -z "${{ inputs.reference_plugins }}" ]; then
-            echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
-            echo "PLUGIN_REF=${{ github.ref_name }}" >> $GITHUB_ENV
-          else
-            if [ "$(git ls-remote https://github.com/${{matrix.plugin.repo}}.git ${{ inputs.reference_plugins }})" ]; then
-              echo "Plugin reference ${{ inputs.reference_plugins }} exists."
-              PLUGIN_REF=${{ inputs.reference_plugins }}
-            else
-              echo "Plugin reference ${{ inputs.reference_plugins }} does not exist, trying with github.ref_name: ${{ github.ref_name }}"
-              if [ "$(git ls-remote https://github.com/${{matrix.plugin.repo}}.git ${{ github.ref_name }})" ]; then
-                echo "Plugin reference ${{ github.ref_name }} exists."
-                PLUGIN_REF=${{ github.ref_name }}
-              else
-                echo "Plugin reference ${{ github.ref_name }} does not exist. Please check if the reference is correct."
-                exit 1
-              fi
-            fi
-
-            echo "PLUGIN_REF=$PLUGIN_REF" >> $GITHUB_ENV
-          fi
-
-      - name: Checkout Plugin
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ matrix.plugin.repo }}
-          ref: ${{ env.PLUGIN_REF }}
-          path: plugins/wazuh-dashboard-plugins
-
-      - name: Move plugin to correct path and remove wazuh-dashboard-plugins parent folder
-        run: |
-          mv plugins/wazuh-dashboard-plugins/${{ matrix.plugin.path }} plugins/${{ matrix.plugin.name }}
-          rm -rf plugins/wazuh-dashboard-plugins
-
-      - name: Bootstrap with Plugins
-        run: yarn osd bootstrap --single-version=loose
-
-      - name: Build Plugin
-        working-directory: plugins/${{ matrix.plugin.name }}
-        run: node ../../scripts/plugin_helpers build --opensearch-dashboards-version=${{ needs.setup-variables.outputs.VERSION_OPENSEARCH }} 2>&1 | tee build.log
-
-      - name: Upload Plugin Artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.plugin.namePackage }}
-          path: plugins/${{ matrix.plugin.name }}/build/*.zip
-          retention-days: 1
-
-      - name: Upload Build Log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.plugin.name }}-${{ needs.setup-variables.outputs.VERSION_OPENSEARCH }}-failed-log
-          path: plugins/${{ matrix.plugin.name }}/build.log
-          retention-days: 1
-
-  build-plugins-fork:
-    name: Build Plugin ${{ matrix.plugin.name }}
-    runs-on: ubuntu-latest
-    needs:
-      [
-        setup-variables,
-        get-outputs-plugins,
-        validate-job
-      ]
-    env:
-      PLUGIN_REF: ${{ inputs.reference_plugins }}
     strategy:
       fail-fast: true
       matrix:
         plugin:
+          - name: wazuh-dashboard-plugins_wazuh
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_WAZUH }}
+            repo: wazuh/wazuh-dashboard-plugins
+            pathPlugin: plugins/wazuh-dashboard-plugins
+            path: plugins/main
+          - name: wazuh-dashboard-plugins_wazuh-check-updates
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_CHECK_UPDATES }}
+            repo: wazuh/wazuh-dashboard-plugins
+            pathPlugin: plugins/wazuh-dashboard-plugins
+            path: plugins/wazuh-check-updates
+          - name: wazuh-dashboard-plugins_wazuh-core
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_CORE }}
+            repo: wazuh/wazuh-dashboard-plugins
+            pathPlugin: plugins/wazuh-dashboard-plugins
+            path: plugins/wazuh-core
           - name: reports-dashboards
-            repo: wazuh/wazuh-dashboard-reporting
             namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_REPORTING }}
+            repo: wazuh/wazuh-dashboard-reporting
           - name: wazuh-security-dashboards-plugin
-            repo: wazuh/wazuh-security-dashboards-plugin
             namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_SECURITY }}
+            repo: wazuh/wazuh-security-dashboards-plugin
           - name: ml-commons-dashboards
-            repo: wazuh/wazuh-dashboard-ml-commons
             namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_ML_COMMONS }}
+            repo: wazuh/wazuh-dashboard-ml-commons
           - name: security-analytics-dashboards
-            repo: wazuh/wazuh-dashboard-security-analytics
             namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_SECURITY_ANALYTICS }}
+            repo: wazuh/wazuh-dashboard-security-analytics
 
-    steps:
-      - name: Checkout Wazuh Dashboards
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Install Yarn
-        run: npm install -g yarn@^1.22.10
-
-      - name: Check if plugin reference exists or use github.ref_name
-        run: |
-          if [ -z "${{ inputs.reference_plugins }}" ]; then
-            echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
-            echo "PLUGIN_REF=${{ github.ref_name }}" >> $GITHUB_ENV
-          else
-            if [ "$(git ls-remote https://github.com/${{matrix.plugin.repo}}.git ${{ inputs.reference_plugins }})" ]; then
-              echo "Plugin reference ${{ inputs.reference_plugins }} exists."
-              PLUGIN_REF=${{ inputs.reference_plugins }}
-            else
-              echo "Plugin reference ${{ inputs.reference_plugins }} does not exist, trying with github.ref_name: ${{ github.ref_name }}"
-              if [ "$(git ls-remote https://github.com/${{matrix.plugin.repo}}.git ${{ github.ref_name }})" ]; then
-                echo "Plugin reference ${{ github.ref_name }} exists."
-                PLUGIN_REF=${{ github.ref_name }}
-              else
-                echo "Plugin reference ${{ github.ref_name }} does not exist. Please check if the reference is correct."
-                exit 1
-              fi
-            fi
-
-            echo "PLUGIN_REF=$PLUGIN_REF" >> $GITHUB_ENV
-          fi
-
-      - name: Checkout Plugin
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ matrix.plugin.repo }}
-          ref: ${{ env.PLUGIN_REF }}
-          path: plugins/${{ matrix.plugin.name }}
-
-      - name: Bootstrap with Plugins
-        run: yarn osd bootstrap --single-version=loose
-
-      - name: Build Plugin
-        working-directory: plugins/${{ matrix.plugin.name }}
-        run: node ../../scripts/plugin_helpers build --opensearch-dashboards-version=${{ needs.setup-variables.outputs.VERSION_OPENSEARCH }} 2>&1 | tee build.log
-
-      - name: Upload Plugin Artifact
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.plugin.namePackage}}
-          path: plugins/${{ matrix.plugin.name }}/build/*.zip
-          retention-days: 1
-
-      - name: Upload Build Log
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.plugin.name }}-${{ needs.setup-variables.outputs.VERSION_OPENSEARCH }}-failed-log
-          path: plugins/${{ matrix.plugin.name }}/build.log
-          retention-days: 1
+    uses: ./.github/workflows/5_builderpackage_dashboard_plugins.yml
+    with:
+      reference_plugins: ${{ inputs.reference_plugins }}
+      version_opensearch: ${{ needs.setup-variables.outputs.VERSION_OPENSEARCH }}
+      name: ${{ matrix.plugin.name }}
+      namePackage: ${{ matrix.plugin.namePackage }}
+      path: ${{ matrix.plugin.path }}
+      repo: ${{ matrix.plugin.repo }}
+      pathPlugin: ${{ matrix.plugin.pathPlugin }}
 
   build-package:
     needs:
       [
         setup-variables,
         get-outputs-plugins,
-        build-plugins-fork,
         build-dashboard,
         build-plugins
       ]
@@ -560,7 +411,7 @@ jobs:
       - name: Download security plugin artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
+          name: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_SECURITY }}
           path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/security-plugin
 
       - name: Download main plugin's artifact
