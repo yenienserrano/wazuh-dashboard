@@ -49,7 +49,6 @@ on:
         type: string
         description: 'Git ref (branch/tag) to use for all plugins'
         required: false
-        default: 'main'
       is_stage:
         type: boolean
         description: 'Set production nomenclature'
@@ -100,32 +99,77 @@ permissions:
   contents: read
 
 jobs:
-  setup-variables:
+  validate-job:
+    runs-on: ubuntu-24.04
+    name: Validate inputs
+    steps:
+      - name: Validate inputs
+        run: |
+          if [[ "${{ inputs.architecture }}" == "amd64" || "${{ inputs.architecture }}" == "arm64" ]] && [[ "${{ inputs.system }}" == "rpm" ]]; then
+            echo "Invalid combination of architecture and system"
+            exit 1
+          fi
+          if [[ "${{ inputs.architecture }}" == "x86_64" || "${{ inputs.architecture }}" == "aarch64" ]] && [[ "${{ inputs.system }}" == "deb" ]]; then
+            echo "Invalid combination of architecture and system"
+            exit 1
+          fi
+
+      # - name: Set up AWS CLI
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
+      #     aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
+      #     aws-region: ${{ secrets.CI_AWS_REGION }}
+    
+  get-outputs-plugins:
     runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    name: Setup variables
+    name: get-outputs-plugins
+    needs: [validate-job]
     outputs:
-      CURRENT_DIR: ${{ steps.setup-variables.outputs.CURRENT_DIR }}
-      VERSION: ${{ steps.setup-variables.outputs.VERSION }}
-      PREVIOUS: ${{ steps.setup-variables.outputs.PREVIOUS }}
-      REVISION: ${{ steps.setup-variables.outputs.REVISION }}
-      COMMIT_SHA: ${{ steps.setup-variables.outputs.COMMIT_SHA }}
-      PLUGINS_SHA: ${{ steps.setup-variables.outputs.PLUGINS_SHA }}
-      SECURITY_SHA: ${{ steps.setup-variables.outputs.SECURITY_SHA }}
-      REPORTING_SHA: ${{ steps.setup-variables.outputs.REPORTING_SHA }}
-      ML_COMMONS_SHA: ${{ steps.setup-variables.outputs.ML_COMMONS_SHA }}
-      SECURITY_ANALYTICS_SHA: ${{ steps.setup-variables.outputs.SECURITY_ANALYTICS_SHA }}
-      PRODUCTION: ${{ steps.setup-variables.outputs.PRODUCTION }}
-      WAZUH_DASHBOARD_SLIM: ${{ steps.setup-variables.outputs.WAZUH_DASHBOARD_SLIM }}
-      WAZUH_SECURITY_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
-      WAZUH_PLUGINS_WAZUH: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_WAZUH }}
-      WAZUH_PLUGINS_CORE: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
-      WAZUH_PLUGINS_CHECK_UPDATES: ${{ steps.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
-      WAZUH_REPORTING_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_REPORTING_PLUGIN }}
-      WAZUH_ML_COMMONS_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_ML_COMMONS_PLUGIN }}
-      WAZUH_SECURITY_ANALYTICS_PLUGIN: ${{ steps.setup-variables.outputs.WAZUH_SECURITY_ANALYTICS_PLUGIN }}
-      PACKAGE_NAME: ${{ steps.setup-variables.outputs.PACKAGE_NAME }}
-      ARCHITECTURE_FLAG: ${{ steps.setup-variables.outputs.ARCHITECTURE_FLAG }}
-      VERSION_OPENSEARCH: ${{ steps.setup-variables.outputs.VERSION_OPENSEARCH }}
+      VERSION: ${{ steps.get-version.outputs.VERSION }}
+      VERSION_OPENSEARCH: ${{ steps.get-version.outputs.VERSION_OPENSEARCH }}
+      REVISION: ${{ steps.get-version.outputs.REVISION }}
+      WAZUH_PLUGINS_SHA: ${{ steps.get-plugins.outputs.WAZUH_PLUGINS_SHA }}
+      WAZUH_SECURITY_SHA: ${{ steps.get-plugins.outputs.WAZUH_SECURITY_SHA }}
+      WAZUH_REPORTING_SHA: ${{ steps.get-plugins.outputs.WAZUH_REPORTING_SHA }}
+      WAZUH_ML_COMMONS_SHA: ${{ steps.get-plugins.outputs.WAZUH_ML_COMMONS_SHA }}
+      WAZUH_SECURITY_ANALYTICS_SHA: ${{ steps.get-plugins.outputs.WAZUH_SECURITY_ANALYTICS_SHA }}
+      NAME_PLUGIN_WAZUH: ${{ steps.get-plugins.outputs.NAME_PLUGIN_WAZUH }}
+      NAME_PLUGIN_CORE: ${{ steps.get-plugins.outputs.NAME_PLUGIN_CORE }}
+      NAME_PLUGIN_CHECK_UPDATES: ${{ steps.get-plugins.outputs.NAME_PLUGIN_CHECK_UPDATES }}
+      NAME_PLUGIN_SECURITY: ${{ steps.get-plugins.outputs.NAME_PLUGIN_SECURITY }}
+      NAME_PLUGIN_REPORTING: ${{ steps.get-plugins.outputs.NAME_PLUGIN_REPORTING }}
+      NAME_PLUGIN_ML_COMMONS: ${{ steps.get-plugins.outputs.NAME_PLUGIN_ML_COMMONS }}
+      NAME_PLUGIN_SECURITY_ANALYTICS: ${{ steps.get-plugins.outputs.NAME_PLUGIN_SECURITY_ANALYTICS }}
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin:
+          - name: plugins
+            packageName: wazuh-dashboard-plugins
+            repository: https://github.com/wazuh/wazuh-dashboard-plugins.git
+            outputNamePackage: WAZUH_PLUGINS_PLUGIN
+            outputSHA: WAZUH_PLUGINS_SHA
+          - name: security
+            packageName: wazuh-security-dashboards-plugin
+            repository: https://github.com/wazuh/wazuh-security-dashboards-plugin.git
+            outputNamePackage: NAME_PLUGIN_SECURITY
+            outputSHA: WAZUH_SECURITY_SHA
+          - name: reporting
+            packageName: wazuh-dashboard-reporting
+            repository: https://github.com/wazuh/wazuh-dashboard-reporting.git
+            outputNamePackage: NAME_PLUGIN_REPORTING
+            outputSHA: WAZUH_REPORTING_SHA
+          - name: ml-commons
+            packageName: wazuh-dashboard-ml-commons
+            repository: https://github.com/wazuh/wazuh-dashboard-ml-commons.git
+            outputNamePackage: WAZUH_ML_COMMONS_PLUGIN
+            outputSHA: WAZUH_ML_COMMONS_SHA
+          - name: security-analytics
+            packageName: wazuh-dashboard-security-analytics
+            repository: https://github.com/wazuh/wazuh-dashboard-security-analytics.git
+            outputNamePackage: WAZUH_SECURITY_ANALYTICS_PLUGIN
+            outputSHA: WAZUH_SECURITY_ANALYTICS_SHA
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -147,6 +191,7 @@ jobs:
           echo "REVISION=$REVISION" >> $GITHUB_OUTPUT
 
       - name: Get outputs of wazuh-dashboard-plugins
+        if: matrix.plugin.name == 'plugins'
         id: get-plugins
         run: |
           REPOSITORY=https://github.com/wazuh/wazuh-dashboard-plugins.git
@@ -174,126 +219,62 @@ jobs:
             echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
             exit 1
           fi
-          echo "WAZUH_PLUGINS_WAZUH=$NAME_PLUGIN_WAZUH" >> $GITHUB_OUTPUT
-          echo "WAZUH_PLUGINS_CORE=$NAME_PLUGIN_CORE" >> $GITHUB_OUTPUT
-          echo "WAZUH_PLUGINS_CHECK_UPDATES=$NAME_PLUGIN_CHECK_UPDATES" >> $GITHUB_OUTPUT
+          echo "NAME_PLUGIN_WAZUH=$NAME_PLUGIN_WAZUH" >> $GITHUB_OUTPUT
+          echo "NAME_PLUGIN_CORE=$NAME_PLUGIN_CORE" >> $GITHUB_OUTPUT
+          echo "NAME_PLUGIN_CHECK_UPDATES=$NAME_PLUGIN_CHECK_UPDATES" >> $GITHUB_OUTPUT
           echo "WAZUH_PLUGINS_SHA=$SHA" >> $GITHUB_OUTPUT
 
-      - name: Get outputs of wazuh-security-dashboards-plugin
+      - name: Get outputs of Forked plugins (${{ matrix.plugin.name }})
         id: get-security
+        if: matrix.plugin.name != 'plugins'
         run: |
-          REPOSITORY=https://github.com/wazuh/wazuh-security-dashboards-plugin.git
+          REPOSITORY=${{ matrix.plugin.repository }}
           REFERENCE="${{ inputs.reference_plugins }}"
           if [ -z "$REFERENCE" ]; then
             echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
             REFERENCE="${{ github.ref_name }}"
             SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
-            WAZUH_SECURITY_PLUGIN=wazuh-security-dashboards-plugin_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            PACKAGE_NAME=${{matrix.plugin.packageName}}_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
           else
             echo "Using reference: $REFERENCE"
             SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
-            if [ -z "$SHA" ]; then
-              echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
-              SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
-              REFERENCE="${{ github.ref_name }}"
-            fi
-            WAZUH_SECURITY_PLUGIN=wazuh-security-dashboards-plugin_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-          fi
-          if [ -z "$SHA" ]; then
-            echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
-            exit 1
-          fi
-          echo "WAZUH_SECURITY_PLUGIN=$WAZUH_SECURITY_PLUGIN" >> $GITHUB_OUTPUT
-          echo "WAZUH_SECURITY_SHA=$SHA" >> $GITHUB_OUTPUT
-
-      - name: Get outputs of wazuh-dashboard-reporting
-        id: get-reporting
-        run: |
-          REPOSITORY=https://github.com/wazuh/wazuh-dashboard-reporting.git
-          REFERENCE="${{ inputs.reference_plugins }}"
-          if [ -z "$REFERENCE" ]; then
-            echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
-            REFERENCE="${{ github.ref_name }}"
-            SHA=$(git ls-remote $REPOSITORY $REFERENCE | cut -f1 | cut -c1-7)
-            WAZUH_REPORTING_PLUGIN=reports-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-          else
-            echo "Using reference: $REFERENCE"
-            SHA=$(git ls-remote $REPOSITORY $REFERENCE | cut -f1 | cut -c1-7)
             if [ -z "$SHA" ]; then
               echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
               REFERENCE="${{ github.ref_name }}"
               SHA=$(git ls-remote $REPOSITORY $REFERENCE | cut -f1 | cut -c1-7)
             fi
-            WAZUH_REPORTING_PLUGIN=reports-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            PACKAGE_NAME=${{matrix.plugin.packageName}}_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
           fi
           if [ -z "$SHA" ]; then
             echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
             exit 1
           fi
-          echo "WAZUH_REPORTING_PLUGIN=$WAZUH_REPORTING_PLUGIN" >> $GITHUB_OUTPUT
-          echo "WAZUH_REPORTING_SHA=$SHA" >> $GITHUB_OUTPUT
+          echo "${{matrix.plugin.outputNamePackage}}=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "${{matrix.plugin.outputNameSHA}}=$SHA" >> $GITHUB_OUTPUT
 
-      - name: Get outputs of wazuh-dashboard-ml-commons
-        id: get-ml
-        run: |
-          REPOSITORY=https://github.com/wazuh/wazuh-dashboard-ml-commons.git
-          REFERENCE="${{ inputs.reference_plugins }}"
-          if [ -z "$REFERENCE" ]; then
-            echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
-            REFERENCE="${{ github.ref_name }}"
-            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
-            WAZUH_ML_COMMONS_PLUGIN=ml-commons-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-          else
-            echo "Using reference: $REFERENCE"
-            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
-            if [ -z "$SHA" ]; then
-              echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
-              SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
-              REFERENCE="${{ github.ref_name }}"
-            fi
-            WAZUH_ML_COMMONS_PLUGIN=ml-commons-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-          fi
-          if [ -z "$SHA" ]; then
-            echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
-            exit 1
-          fi
-          echo "WAZUH_ML_COMMONS_PLUGIN=$WAZUH_ML_COMMONS_PLUGIN" >> $GITHUB_OUTPUT
-          echo "ML_COMMONS_SHA=$SHA" >> $GITHUB_OUTPUT
-
-      - name: Get outputs of wazuh-dashboard-security-analytics
-        id: get-security-analytics
-        run: |
-          REPOSITORY=https://github.com/wazuh/wazuh-dashboard-security-analytics.git
-          REFERENCE="${{ inputs.reference_plugins }}"
-          if [ -z "$REFERENCE" ]; then
-            echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
-            REFERENCE="${{ github.ref_name }}"
-            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
-            WAZUH_SECURITY_ANALYTICS_PLUGIN=security-analytics-dashboards_${VERSION}-${REVISION}_$(echo ${{ github.ref_name }} | sed 's/\//-/g').zip
-          else
-            echo "Using reference: $REFERENCE"
-            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
-            if [ -z "$SHA" ]; then
-              echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
-              SHA=$(git ls-remote $REPOSITORY ${{ github.ref_name }} | cut -f1 | cut -c1-7)
-              REFERENCE="${{ github.ref_name }}"
-            fi
-            WAZUH_SECURITY_ANALYTICS_PLUGIN=security-analytics-dashboards_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-          fi
-          if [ -z "$SHA" ]; then
-            echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
-            exit 1
-          fi
-          echo "WAZUH_SECURITY_ANALYTICS_PLUGIN=$WAZUH_SECURITY_ANALYTICS_PLUGIN" >> $GITHUB_OUTPUT
-          echo "WAZUH_SECURITY_ANALYTICS_SHA=$SHA" >> $GITHUB_OUTPUT
-
+  setup-variables:
+    runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    needs: [validate-job, get-outputs-plugins]
+    name: Setup variables
+    outputs:
+      CURRENT_DIR: ${{ steps.setup-variables.outputs.CURRENT_DIR }}
+      VERSION: ${{ steps.setup-variables.outputs.VERSION }}
+      PREVIOUS: ${{ steps.setup-variables.outputs.PREVIOUS }}
+      REVISION: ${{ steps.setup-variables.outputs.REVISION }}
+      ALL_COMMIT_SHAS: ${{ steps.setup-variables.outputs.ALL_COMMIT_SHAS }}
+      PRODUCTION: ${{ steps.setup-variables.outputs.PRODUCTION }}
+      WAZUH_DASHBOARD_SLIM: ${{ steps.setup-variables.outputs.WAZUH_DASHBOARD_SLIM }}
+      PACKAGE_NAME: ${{ steps.setup-variables.outputs.PACKAGE_NAME }}
+      ARCHITECTURE_FLAG: ${{ steps.setup-variables.outputs.ARCHITECTURE_FLAG }}
+      VERSION_OPENSEARCH: ${{ steps.setup-variables.outputs.VERSION_OPENSEARCH }}
+    steps:
       - name: Setup variables
         id: setup-variables
         run: |
           CURRENT_DIR=$(pwd -P)
-          VERSION=${{ steps.get-version.outputs.VERSION }}
-          VERSION_OPENSEARCH=${{ steps.get-version.outputs.VERSION_OPENSEARCH }}
-          REVISION=${{ steps.get-version.outputs.REVISION }}
+          VERSION=${{ needs.get-outputs-plugins.outputs.VERSION }}
+          VERSION_OPENSEARCH=${{ needs.get-outputs-plugins.outputs.VERSION_OPENSEARCH }}
+          REVISION=${{ needs.get-outputs-plugins.outputs.REVISION }}
           # Check the corresponding previous version to be used in the upgrade test
           sudo curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | sudo gpg --no-default-keyring --keyring gnupg-ring:/usr/share/keyrings/wazuh.gpg --import && sudo chmod 644 /usr/share/keyrings/wazuh.gpg
           sudo echo "deb [signed-by=/usr/share/keyrings/wazuh.gpg] https://packages.wazuh.com/4.x/apt/ stable main" | sudo tee -a /etc/apt/sources.list.d/wazuh.list
@@ -309,12 +290,6 @@ jobs:
           if [ -z "$PREVIOUS" ]; then
             echo "::warning No previous version::No previous version found for this architecture. Upgrade test will be skipped."
           fi
-          COMMIT_SHA=$(git rev-parse --short HEAD)
-          PLUGINS_SHA=${{steps.get-plugins.outputs.WAZUH_PLUGINS_SHA}}
-          SECURITY_SHA=${{steps.get-security.outputs.WAZUH_SECURITY_SHA}}
-          REPORTING_SHA=${{steps.get-reporting.outputs.WAZUH_REPORTING_SHA}}
-          ML_COMMONS_SHA=${{steps.get-ml.outputs.ML_COMMONS_SHA}}
-          SECURITY_ANALYTICS_SHA=${{steps.get-security-analytics.outputs.WAZUH_SECURITY_ANALYTICS_SHA}}
           if [ "${{ inputs.is_stage }}" = "true" ]; then
             PRODUCTION=--production
           else
@@ -344,49 +319,14 @@ jobs:
           echo "VERSION_OPENSEARCH=$VERSION_OPENSEARCH" >> $GITHUB_OUTPUT
           echo "PREVIOUS=$PREVIOUS" >> $GITHUB_OUTPUT
           echo "REVISION=$REVISION" >> $GITHUB_OUTPUT
-          echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_OUTPUT
-          echo "PLUGINS_SHA=$PLUGINS_SHA" >> $GITHUB_OUTPUT
-          echo "SECURITY_SHA=$SECURITY_SHA" >> $GITHUB_OUTPUT
-          echo "ML_COMMONS_SHA=$ML_COMMONS_SHA" >> $GITHUB_OUTPUT
-          echo "SECURITY_ANALYTICS_SHA=$SECURITY_ANALYTICS_SHA" >> $GITHUB_OUTPUT
-          echo "REPORTING_SHA=$REPORTING_SHA" >> $GITHUB_OUTPUT
+          echo "ALL_COMMIT_SHAS=$(git rev-parse --short HEAD)-${{needs.get-outputs-plugins.outputs.WAZUH_PLUGINS_SHA}}-${{needs.get-outputs-plugins.outputs.WAZUH_SECURITY_SHA}}-${{needs.get-outputs-plugins.outputs.WAZUH_REPORTING_SHA}}-${{needs.get-outputs-plugins.outputs.WAZUH_ML_COMMONS_SHA}}-${{needs.get-outputs-plugins.outputs.WAZUH_SECURITY_ANALYTICS_SHA}}" >> $GITHUB_OUTPUT
           echo "PRODUCTION=$PRODUCTION" >> $GITHUB_OUTPUT
           echo "WAZUH_DASHBOARD_SLIM=$WAZUH_DASHBOARD_SLIM" >> $GITHUB_OUTPUT
-          echo "WAZUH_ML_COMMONS_PLUGIN=${{steps.get-ml.outputs.WAZUH_ML_COMMONS_PLUGIN}}" >> $GITHUB_OUTPUT
-          echo "WAZUH_SECURITY_ANALYTICS_PLUGIN=${{steps.get-security-analytics.outputs.WAZUH_SECURITY_ANALYTICS_PLUGIN}}" >> $GITHUB_OUTPUT
-          echo "WAZUH_SECURITY_PLUGIN=${{steps.get-security.outputs.WAZUH_SECURITY_PLUGIN}}" >> $GITHUB_OUTPUT
-          echo "WAZUH_REPORTING_PLUGIN=${{steps.get-reporting.outputs.WAZUH_REPORTING_PLUGIN}}" >> $GITHUB_OUTPUT
-          echo "WAZUH_PLUGINS_WAZUH=${{steps.get-plugins.outputs.WAZUH_PLUGINS_WAZUH}}" >> $GITHUB_OUTPUT
-          echo "WAZUH_PLUGINS_CORE=${{steps.get-plugins.outputs.WAZUH_PLUGINS_CORE}}" >> $GITHUB_OUTPUT
-          echo "WAZUH_PLUGINS_CHECK_UPDATES=${{steps.get-plugins.outputs.WAZUH_PLUGINS_CHECK_UPDATES}}" >> $GITHUB_OUTPUT
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> $GITHUB_OUTPUT
           echo "ARCHITECTURE_FLAG=$ARCHITECTURE_FLAG" >> $GITHUB_OUTPUT
 
-  validate-job:
-    runs-on: ubuntu-24.04
-    needs: setup-variables
-    name: Validate inputs
-    steps:
-      - name: Validate inputs
-        run: |
-          if [[ "${{ inputs.architecture }}" == "amd64" || "${{ inputs.architecture }}" == "arm64" ]] && [[ "${{ inputs.system }}" == "rpm" ]]; then
-            echo "Invalid combination of architecture and system"
-            exit 1
-          fi
-          if [[ "${{ inputs.architecture }}" == "x86_64" || "${{ inputs.architecture }}" == "aarch64" ]] && [[ "${{ inputs.system }}" == "deb" ]]; then
-            echo "Invalid combination of architecture and system"
-            exit 1
-          fi
-
-      # - name: Set up AWS CLI
-      #   uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
-      #     aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
-      #     aws-region: ${{ secrets.CI_AWS_REGION }}
-
   build-dashboard:
-    needs: [validate-job]
+    needs: [validate-job, setup-variables]
     name: Build dashboard
     uses: ./.github/workflows/5_builderpackage_dashboard_core.yml
     with:
@@ -399,7 +339,8 @@ jobs:
     needs:
       [
         setup-variables,
-        validate-job
+        validate-job,
+        get-outputs-plugins
       ]
     env:
       PLUGIN_REF: ${{ inputs.reference_plugins }}
@@ -408,18 +349,17 @@ jobs:
       matrix:
         plugin:
           - name: wazuh-dashboard-plugins_wazuh
-            namePackage: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_WAZUH }}
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_WAZUH }}
             path: plugins/main
             repo: wazuh/wazuh-dashboard-plugins
           - name: wazuh-dashboard-plugins_wazuh-check-updates
-            namePackage: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_CHECK_UPDATES }}
             path: plugins/wazuh-check-updates
             repo: wazuh/wazuh-dashboard-plugins
           - name: wazuh-dashboard-plugins_wazuh-core
-            namePackage: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_CORE }}
             path: plugins/wazuh-core
             repo: wazuh/wazuh-dashboard-plugins
-
 
     steps:
       - name: Checkout Wazuh Dashboards
@@ -593,6 +533,7 @@ jobs:
     needs:
       [
         setup-variables,
+        get-outputs-plugins,
         build-plugins-fork,
         build-dashboard,
         build-plugins
@@ -624,32 +565,32 @@ jobs:
       - name: Download main plugin's artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_WAZUH }}
+          name: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_WAZUH }}
           path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
       - name: Download core plugin's artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_CORE }}
+          name: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_CORE }}
           path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
       - name: Download check update plugin's artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup-variables.outputs.WAZUH_PLUGINS_CHECK_UPDATES }}
+          name: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_CHECK_UPDATES }}
           path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/plugins
       - name: Download report plugin artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup-variables.outputs.WAZUH_REPORTING_PLUGIN }}
+          name: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_REPORTING }}
           path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/report-plugin
       - name: Download ml commons plugin artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup-variables.outputs.WAZUH_ML_COMMONS_PLUGIN }}
+          name: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_ML_COMMONS }}
           path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/ml-commons-plugin
       - name: Download security analytics plugin artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ needs.setup-variables.outputs.WAZUH_SECURITY_ANALYTICS_PLUGIN }}
+          name: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_SECURITY_ANALYTICS }}
           path: ${{ needs.setup-variables.outputs.CURRENT_DIR }}/artifacts/security-analytics-plugin
 
       - name: Zip plugins
@@ -672,7 +613,7 @@ jobs:
             -b file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/dashboard-package.zip \
             -rp file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/report-package.zip \
             -sa file://${{needs.setup-variables.outputs.CURRENT_DIR}}/artifacts/security-analytics-package.zip \
-            --commit-sha ${{needs.setup-variables.outputs.COMMIT_SHA}}-${{needs.setup-variables.outputs.PLUGINS_SHA}}-${{needs.setup-variables.outputs.SECURITY_SHA}}-${{needs.setup-variables.outputs.REPORTING_SHA}}-${{needs.setup-variables.outputs.ML_COMMONS_SHA}}-${{needs.setup-variables.outputs.SECURITY_ANALYTICS_SHA}} \
+            --commit-sha ${{needs.setup-variables.outputs.ALL_COMMIT_SHAS}} \
             --${{ inputs.system }} ${{ needs.setup-variables.outputs.PRODUCTION }} --debug
 
       - name: Upload artifact
