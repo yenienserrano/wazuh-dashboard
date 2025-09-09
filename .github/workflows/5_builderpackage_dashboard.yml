@@ -130,31 +130,31 @@ jobs:
       VERSION_OPENSEARCH: ${{ steps.get-version.outputs.VERSION_OPENSEARCH }}
       REVISION: ${{ steps.get-version.outputs.REVISION }}
       WAZUH_PLUGINS_SHA: ${{ steps.get-plugins.outputs.WAZUH_PLUGINS_SHA }}
-      WAZUH_SECURITY_SHA: ${{ steps.get-plugins.outputs.WAZUH_SECURITY_SHA }}
-      WAZUH_REPORTING_SHA: ${{ steps.get-plugins.outputs.WAZUH_REPORTING_SHA }}
-      WAZUH_ML_COMMONS_SHA: ${{ steps.get-plugins.outputs.WAZUH_ML_COMMONS_SHA }}
-      WAZUH_SECURITY_ANALYTICS_SHA: ${{ steps.get-plugins.outputs.WAZUH_SECURITY_ANALYTICS_SHA }}
+      WAZUH_SECURITY_SHA: ${{ steps.get-forked-plugins.outputs.WAZUH_SECURITY_SHA }}
+      WAZUH_REPORTING_SHA: ${{ steps.get-forked-plugins.outputs.WAZUH_REPORTING_SHA }}
+      WAZUH_ML_COMMONS_SHA: ${{ steps.get-forked-plugins.outputs.WAZUH_ML_COMMONS_SHA }}
+      WAZUH_SECURITY_ANALYTICS_SHA: ${{ steps.get-forked-plugins.outputs.WAZUH_SECURITY_ANALYTICS_SHA }}
       NAME_PLUGIN_WAZUH: ${{ steps.get-plugins.outputs.NAME_PLUGIN_WAZUH }}
       NAME_PLUGIN_CORE: ${{ steps.get-plugins.outputs.NAME_PLUGIN_CORE }}
       NAME_PLUGIN_CHECK_UPDATES: ${{ steps.get-plugins.outputs.NAME_PLUGIN_CHECK_UPDATES }}
-      NAME_PLUGIN_SECURITY: ${{ steps.get-plugins.outputs.NAME_PLUGIN_SECURITY }}
-      NAME_PLUGIN_REPORTING: ${{ steps.get-plugins.outputs.NAME_PLUGIN_REPORTING }}
-      NAME_PLUGIN_ML_COMMONS: ${{ steps.get-plugins.outputs.NAME_PLUGIN_ML_COMMONS }}
-      NAME_PLUGIN_SECURITY_ANALYTICS: ${{ steps.get-plugins.outputs.NAME_PLUGIN_SECURITY_ANALYTICS }}
+      NAME_PLUGIN_SECURITY: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_SECURITY }}
+      NAME_PLUGIN_REPORTING: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_REPORTING }}
+      NAME_PLUGIN_ML_COMMONS: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_ML_COMMONS }}
+      NAME_PLUGIN_SECURITY_ANALYTICS: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_SECURITY_ANALYTICS }}
     strategy:
       fail-fast: false
       matrix:
         plugin:
+          - name: security # this is for reference only,
+            packageName: wazuh-security-dashboards-plugin # this is for the name of the plugin
+            repository: https://github.com/wazuh/wazuh-security-dashboards-plugin.git
+            outputNamePackage: NAME_PLUGIN_SECURITY # this is for the output name of the plugin
+            outputSHA: WAZUH_SECURITY_SHA # this is for the output sha of the plugin
           - name: plugins
             packageName: wazuh-dashboard-plugins
             repository: https://github.com/wazuh/wazuh-dashboard-plugins.git
-            outputNamePackage: WAZUH_PLUGINS_PLUGIN
+            outputNamePackage: WAZUH_PLUGINS_PLUGIN # this is just a placeholder, not used in this case because all three names are generated in the run step, if we need to add more plugins in this repo we add more on the run step
             outputSHA: WAZUH_PLUGINS_SHA
-          - name: security
-            packageName: wazuh-security-dashboards-plugin
-            repository: https://github.com/wazuh/wazuh-security-dashboards-plugin.git
-            outputNamePackage: NAME_PLUGIN_SECURITY
-            outputSHA: WAZUH_SECURITY_SHA
           - name: reporting
             packageName: wazuh-dashboard-reporting
             repository: https://github.com/wazuh/wazuh-dashboard-reporting.git
@@ -225,7 +225,7 @@ jobs:
           echo "WAZUH_PLUGINS_SHA=$SHA" >> $GITHUB_OUTPUT
 
       - name: Get outputs of Forked plugins (${{ matrix.plugin.name }})
-        id: get-security
+        id: get-forked-plugins
         if: matrix.plugin.name != 'plugins'
         run: |
           REPOSITORY=${{ matrix.plugin.repository }}
