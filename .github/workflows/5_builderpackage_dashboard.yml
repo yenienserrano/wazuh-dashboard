@@ -194,7 +194,7 @@ jobs:
         if: matrix.plugin.name == 'plugins'
         id: get-plugins
         run: |
-          REPOSITORY=https://github.com/wazuh/wazuh-dashboard-plugins.git
+          REPOSITORY=${{ matrix.plugin.repository }}
           REFERENCE="${{ inputs.reference_plugins }}"
           if [ -z "$REFERENCE" ]; then
             echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
@@ -222,7 +222,7 @@ jobs:
           echo "NAME_PLUGIN_WAZUH=$NAME_PLUGIN_WAZUH" >> $GITHUB_OUTPUT
           echo "NAME_PLUGIN_CORE=$NAME_PLUGIN_CORE" >> $GITHUB_OUTPUT
           echo "NAME_PLUGIN_CHECK_UPDATES=$NAME_PLUGIN_CHECK_UPDATES" >> $GITHUB_OUTPUT
-          echo "WAZUH_PLUGINS_SHA=$SHA" >> $GITHUB_OUTPUT
+          echo "${{matrix.plugin.outputSHA}}=$SHA" >> $GITHUB_OUTPUT
 
       - name: Get outputs of Forked plugins (${{ matrix.plugin.name }})
         id: get-forked-plugins
@@ -249,9 +249,8 @@ jobs:
             echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
             exit 1
           fi
-          echo ${{matrix.plugin.outputNamePackage}}
           echo "${{matrix.plugin.outputNamePackage}}=$PACKAGE_NAME" >> $GITHUB_OUTPUT
-          echo "${{matrix.plugin.outputNameSHA}}=$SHA" >> $GITHUB_OUTPUT
+          echo "${{matrix.plugin.outputSHA}}=$SHA" >> $GITHUB_OUTPUT
 
   setup-variables:
     runs-on: ${{ (inputs.architecture == 'arm64' || inputs.architecture == 'aarch64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
