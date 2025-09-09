@@ -163,12 +163,12 @@ jobs:
           - name: ml-commons
             packageName: wazuh-dashboard-ml-commons
             repository: https://github.com/wazuh/wazuh-dashboard-ml-commons.git
-            outputNamePackage: WAZUH_ML_COMMONS_PLUGIN
+            outputNamePackage: NAME_PLUGIN_ML_COMMONS
             outputSHA: WAZUH_ML_COMMONS_SHA
           - name: security-analytics
             packageName: wazuh-dashboard-security-analytics
             repository: https://github.com/wazuh/wazuh-dashboard-security-analytics.git
-            outputNamePackage: WAZUH_SECURITY_ANALYTICS_PLUGIN
+            outputNamePackage: NAME_PLUGIN_SECURITY_ANALYTICS
             outputSHA: WAZUH_SECURITY_ANALYTICS_SHA
     steps:
       - name: Checkout code
