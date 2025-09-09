@@ -142,7 +142,7 @@ jobs:
       NAME_PLUGIN_ML_COMMONS: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_ML_COMMONS }}
       NAME_PLUGIN_SECURITY_ANALYTICS: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_SECURITY_ANALYTICS }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         plugin:
           - name: security # this is for reference only,
@@ -440,26 +440,27 @@ jobs:
     needs:
       [
         setup-variables,
+        get-outputs-plugins,
         validate-job
       ]
     env:
       PLUGIN_REF: ${{ inputs.reference_plugins }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         plugin:
           - name: reports-dashboards
             repo: wazuh/wazuh-dashboard-reporting
-            namePackage: ${{ needs.setup-variables.outputs.WAZUH_REPORTING_PLUGIN }}
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_REPORTING }}
           - name: wazuh-security-dashboards-plugin
             repo: wazuh/wazuh-security-dashboards-plugin
-            namePackage: ${{ needs.setup-variables.outputs.WAZUH_SECURITY_PLUGIN }}
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_SECURITY }}
           - name: ml-commons-dashboards
             repo: wazuh/wazuh-dashboard-ml-commons
-            namePackage: ${{ needs.setup-variables.outputs.WAZUH_ML_COMMONS_PLUGIN }}
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_ML_COMMONS }}
           - name: security-analytics-dashboards
             repo: wazuh/wazuh-dashboard-security-analytics
-            namePackage: ${{ needs.setup-variables.outputs.WAZUH_SECURITY_ANALYTICS_PLUGIN }}
+            namePackage: ${{ needs.get-outputs-plugins.outputs.NAME_PLUGIN_SECURITY_ANALYTICS }}
 
     steps:
       - name: Checkout Wazuh Dashboards
