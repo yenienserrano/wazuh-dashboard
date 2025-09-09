@@ -130,17 +130,17 @@ jobs:
       VERSION_OPENSEARCH: ${{ steps.get-version.outputs.VERSION_OPENSEARCH }}
       REVISION: ${{ steps.get-version.outputs.REVISION }}
       WAZUH_PLUGINS_SHA: ${{ steps.get-plugins.outputs.WAZUH_PLUGINS_SHA }}
-      WAZUH_SECURITY_SHA: ${{ steps.get-forked-plugins.outputs.WAZUH_SECURITY_SHA }}
-      WAZUH_REPORTING_SHA: ${{ steps.get-forked-plugins.outputs.WAZUH_REPORTING_SHA }}
-      WAZUH_ML_COMMONS_SHA: ${{ steps.get-forked-plugins.outputs.WAZUH_ML_COMMONS_SHA }}
-      WAZUH_SECURITY_ANALYTICS_SHA: ${{ steps.get-forked-plugins.outputs.WAZUH_SECURITY_ANALYTICS_SHA }}
+      WAZUH_SECURITY_SHA: ${{ steps.get-plugins.outputs.WAZUH_SECURITY_SHA }}
+      WAZUH_REPORTING_SHA: ${{ steps.get-plugins.outputs.WAZUH_REPORTING_SHA }}
+      WAZUH_ML_COMMONS_SHA: ${{ steps.get-plugins.outputs.WAZUH_ML_COMMONS_SHA }}
+      WAZUH_SECURITY_ANALYTICS_SHA: ${{ steps.get-plugins.outputs.WAZUH_SECURITY_ANALYTICS_SHA }}
       NAME_PLUGIN_WAZUH: ${{ steps.get-plugins.outputs.NAME_PLUGIN_WAZUH }}
       NAME_PLUGIN_CORE: ${{ steps.get-plugins.outputs.NAME_PLUGIN_CORE }}
       NAME_PLUGIN_CHECK_UPDATES: ${{ steps.get-plugins.outputs.NAME_PLUGIN_CHECK_UPDATES }}
-      NAME_PLUGIN_SECURITY: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_SECURITY }}
-      NAME_PLUGIN_REPORTING: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_REPORTING }}
-      NAME_PLUGIN_ML_COMMONS: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_ML_COMMONS }}
-      NAME_PLUGIN_SECURITY_ANALYTICS: ${{ steps.get-forked-plugins.outputs.NAME_PLUGIN_SECURITY_ANALYTICS }}
+      NAME_PLUGIN_SECURITY: ${{ steps.get-plugins.outputs.NAME_PLUGIN_SECURITY }}
+      NAME_PLUGIN_REPORTING: ${{ steps.get-plugins.outputs.NAME_PLUGIN_REPORTING }}
+      NAME_PLUGIN_ML_COMMONS: ${{ steps.get-plugins.outputs.NAME_PLUGIN_ML_COMMONS }}
+      NAME_PLUGIN_SECURITY_ANALYTICS: ${{ steps.get-plugins.outputs.NAME_PLUGIN_SECURITY_ANALYTICS }}
     strategy:
       fail-fast: true
       matrix:
@@ -191,7 +191,6 @@ jobs:
           echo "REVISION=$REVISION" >> $GITHUB_OUTPUT
 
       - name: Get outputs of wazuh-dashboard-plugins
-        if: matrix.plugin.name == 'plugins'
         id: get-plugins
         run: |
           REPOSITORY=${{ matrix.plugin.repository }}
@@ -200,9 +199,13 @@ jobs:
             echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
             REFERENCE="${{ github.ref_name }}"
             SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
-            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            if [ "${{matrix.plugin.name}}" == 'plugins' ]; then
+              NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+              NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+              NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            else 
+              PACKAGE_NAME=${{matrix.plugin.packageName}}_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            fi
           else
             echo "Using reference: $REFERENCE"
             SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
@@ -211,45 +214,26 @@ jobs:
               REFERENCE="${{ github.ref_name }}"
               SHA=$(git ls-remote $REPOSITORY $REFERENCE | cut -f1 | cut -c1-7)
             fi
-            NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-            NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-            NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            if [ "${{matrix.plugin.name}}" == 'plugins' ]; then
+              NAME_PLUGIN_WAZUH=wazuh-dashboard-plugins_wazuh_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+              NAME_PLUGIN_CORE=wazuh-dashboard-plugins_wazuh-core_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+              NAME_PLUGIN_CHECK_UPDATES=wazuh-dashboard-plugins_wazuh-check-updates_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            else 
+              PACKAGE_NAME=${{matrix.plugin.packageName}}_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+            fi
           fi
           if [ -z "$SHA" ]; then
             echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
             exit 1
           fi
-          echo "NAME_PLUGIN_WAZUH=$NAME_PLUGIN_WAZUH" >> $GITHUB_OUTPUT
-          echo "NAME_PLUGIN_CORE=$NAME_PLUGIN_CORE" >> $GITHUB_OUTPUT
-          echo "NAME_PLUGIN_CHECK_UPDATES=$NAME_PLUGIN_CHECK_UPDATES" >> $GITHUB_OUTPUT
-          echo "${{matrix.plugin.outputSHA}}=$SHA" >> $GITHUB_OUTPUT
 
-      - name: Get outputs of Forked plugins (${{ matrix.plugin.name }})
-        id: get-forked-plugins
-        if: matrix.plugin.name != 'plugins'
-        run: |
-          REPOSITORY=${{ matrix.plugin.repository }}
-          REFERENCE="${{ inputs.reference_plugins }}"
-          if [ -z "$REFERENCE" ]; then
-            echo "No plugin reference provided, using github.ref_name: ${{ github.ref_name }}"
-            REFERENCE="${{ github.ref_name }}"
-            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
-            PACKAGE_NAME=${{matrix.plugin.packageName}}_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
-          else
-            echo "Using reference: $REFERENCE"
-            SHA=$(git ls-remote $REPOSITORY "$REFERENCE" | cut -f1 | cut -c1-7)
-            if [ -z "$SHA" ]; then
-              echo "Reference $REFERENCE not found, trying with '${{ github.ref_name }}' branch"
-              REFERENCE="${{ github.ref_name }}"
-              SHA=$(git ls-remote $REPOSITORY $REFERENCE | cut -f1 | cut -c1-7)
-            fi
-            PACKAGE_NAME=${{matrix.plugin.packageName}}_${{ steps.get-version.outputs.VERSION }}-${{ steps.get-version.outputs.REVISION }}_$(echo $REFERENCE | sed 's/\//-/g').zip
+          if [ "${{matrix.plugin.name}}" == 'plugins' ]; then
+            echo "NAME_PLUGIN_WAZUH=$NAME_PLUGIN_WAZUH" >> $GITHUB_OUTPUT
+            echo "NAME_PLUGIN_CORE=$NAME_PLUGIN_CORE" >> $GITHUB_OUTPUT
+            echo "NAME_PLUGIN_CHECK_UPDATES=$NAME_PLUGIN_CHECK_UPDATES" >> $GITHUB_OUTPUT
+          else 
+            echo "${{matrix.plugin.outputNamePackage}}=$PACKAGE_NAME" >> $GITHUB_OUTPUT
           fi
-          if [ -z "$SHA" ]; then
-            echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
-            exit 1
-          fi
-          echo "${{matrix.plugin.outputNamePackage}}=$PACKAGE_NAME" >> $GITHUB_OUTPUT
           echo "${{matrix.plugin.outputSHA}}=$SHA" >> $GITHUB_OUTPUT
 
   setup-variables:
