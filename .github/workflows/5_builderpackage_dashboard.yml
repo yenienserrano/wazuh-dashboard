@@ -49,7 +49,6 @@ on:
         type: string
         description: 'Git ref (branch/tag) to use for all plugins'
         required: false
-        default: 'main'
       is_stage:
         type: boolean
         description: 'Set production nomenclature'
