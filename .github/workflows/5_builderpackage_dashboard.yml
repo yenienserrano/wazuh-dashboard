@@ -114,12 +114,12 @@ jobs:
             exit 1
           fi
 
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
-          aws-region: ${{ secrets.CI_AWS_REGION }}
+      # - name: Set up AWS CLI
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
+      #     aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
+      #     aws-region: ${{ secrets.CI_AWS_REGION }}
 
   # This job retrieves the necessary information about the plugins to be used in the build process.
   # if need to add more forked plugins:
@@ -662,42 +662,42 @@ jobs:
             python3 modules/allocation/main.py --action delete --track-output "/tmp/track.yaml"
           fi
 
-  upload-package:
-    needs: [setup-variables, test-package]
-    runs-on: ${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    name: Upload package
-    steps:
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
-          aws-region: ${{ secrets.CI_AWS_REGION }}
+  # upload-package:
+  #   needs: [setup-variables, test-package]
+  #   runs-on: ${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+  #   name: Upload package
+  #   steps:
+  #     - name: Set up AWS CLI
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_ACCESS_KEY }}
+  #         aws-secret-access-key: ${{ secrets.CI_INTERNAL_DEVELOPMENT_BUCKET_USER_SECRET_KEY }}
+  #         aws-region: ${{ secrets.CI_AWS_REGION }}
 
-      - name: Download  artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}
-          path: ./
+  #     - name: Download  artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}
+  #         path: ./
 
-      - name: Download  checksum
-        if: ${{ inputs.checksum }}
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512
-          path: ./
+  #     - name: Download  checksum
+  #       if: ${{ inputs.checksum }}
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512
+  #         path: ./
 
-      - name: Upload package
-        run: |
-          echo "Uploading package"
-          aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}} s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
-          s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}"
-          echo "S3 URI: ${s3uri}"
+  #     - name: Upload package
+  #       run: |
+  #         echo "Uploading package"
+  #         aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}} s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
+  #         s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}"
+  #         echo "S3 URI: ${s3uri}"
 
-      - name: Upload SHA512
-        if: ${{ inputs.checksum }}
-        run: |
-          echo "Uploading checksum"
-          aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512 s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
-          s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512"
-          echo "S3 sha512 URI: ${s3uri}"
+  #     - name: Upload SHA512
+  #       if: ${{ inputs.checksum }}
+  #       run: |
+  #         echo "Uploading checksum"
+  #         aws s3 cp ./${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512 s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/
+  #         s3uri="s3://xdrsiem-packages-dev-internal/development/wazuh/5.x/main/packages/${{needs.setup-variables.outputs.PACKAGE_NAME}}.sha512"
+  #         echo "S3 sha512 URI: ${s3uri}"
