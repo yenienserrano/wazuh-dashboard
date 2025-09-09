@@ -259,6 +259,9 @@ jobs:
       ARCHITECTURE_FLAG: ${{ steps.setup-variables.outputs.ARCHITECTURE_FLAG }}
       VERSION_OPENSEARCH: ${{ steps.setup-variables.outputs.VERSION_OPENSEARCH }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup variables
         id: setup-variables
         run: |
