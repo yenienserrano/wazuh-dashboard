@@ -249,6 +249,7 @@ jobs:
             echo "Reference ${{ github.ref_name }} not found, check if the repository exists and the reference is correct."
             exit 1
           fi
+          echo ${{matrix.plugin.outputNamePackage}}
           echo "${{matrix.plugin.outputNamePackage}}=$PACKAGE_NAME" >> $GITHUB_OUTPUT
           echo "${{matrix.plugin.outputNameSHA}}=$SHA" >> $GITHUB_OUTPUT
 
