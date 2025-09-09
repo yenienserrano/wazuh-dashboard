@@ -82,7 +82,7 @@ jobs:
         with:
           repository: ${{ inputs.repo }}
           ref: ${{ env.PLUGIN_REF }}
-          path: ${{ inputs.pathPlugin || inputs.name }}
+          path: ${{ inputs.pathPlugin || format('plugins/{0}', inputs.name) }}
 
       - name: Move plugin to correct path and remove wazuh-dashboard-plugins parent folder
         if: ${{ inputs.repo == 'wazuh/wazuh-dashboard-plugins' }}
