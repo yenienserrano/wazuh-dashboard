@@ -27,6 +27,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: workflow
 
     steps:
       - name: Checkout code
