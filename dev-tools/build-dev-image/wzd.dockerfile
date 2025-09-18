@@ -25,6 +25,9 @@ RUN git clone --depth 1 --branch ${WAZUH_DASHBOARD_BRANCH} https://github.com/wa
 RUN chown node.node /home/node/kbn
 
 # Configure yarn for better network handling
+
+WORKDIR /home/node/kbn
+
 RUN yarn config set network-timeout 600000 && \
     yarn config set network-concurrency 1 && \
     yarn config set registry https://registry.yarnpkg.com/
@@ -33,8 +36,7 @@ RUN yarn config set network-timeout 600000 && \
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn/v6,sharing=locked \
     --mount=type=cache,target=/root/.yarn,sharing=locked \
     yarn osd bootstrap --production
-
-WORKDIR /home/node/kbn
+    
 RUN yarn osd bootstrap --production
 
 WORKDIR /home/node/kbn/plugins
