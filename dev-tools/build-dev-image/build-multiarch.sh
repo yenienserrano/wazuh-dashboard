@@ -10,6 +10,7 @@ WAZUH_DASHBOARD_PLUGINS_BRANCH="main"
 WAZUH_DASHBOARD_ML_COMMONS_BRANCH="main"
 WAZUH_DASHBOARD_SECURITY_ANALYTICS_BRANCH="main"
 TAG="3.2.0-5.0.0"
+PLATFORM="linux/amd64,linux/arm64"
 PUSH=false
 
 # Function to show help
@@ -42,6 +43,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         -n|--node-version)
             NODE_VERSION="$2"
+            shift 2
+            ;;
+        --platform)
+            PLATFORMS="$2"
             shift 2
             ;;
         -o|--opensearch-version)
@@ -104,6 +109,7 @@ echo "ML Commons Branch: $WAZUH_DASHBOARD_ML_COMMONS_BRANCH"
 echo "Security Analytics Branch: $WAZUH_DASHBOARD_SECURITY_ANALYTICS_BRANCH"
 echo "Tag: quay.io/wazuh/osd-dev:$TAG"
 echo "Push: $PUSH"
+echo "Platform: $PLATFORM"
 echo "==========================="
 
 # Create multiarch builder if it doesn't exist
@@ -112,7 +118,7 @@ docker buildx inspect multiarch >/dev/null 2>&1 || docker buildx create --use --
 
 # Prepare buildx arguments
 BUILDX_ARGS=(
-    --platform linux/amd64,linux/arm64
+    --platform $PLATFORM
     --build-arg NODE_VERSION="$NODE_VERSION"
     --build-arg OPENSEARCH_DASHBOARD_VERSION="$OPENSEARCH_DASHBOARD_VERSION"
     --build-arg WAZUH_DASHBOARD_BRANCH="$WAZUH_DASHBOARD_BRANCH"
