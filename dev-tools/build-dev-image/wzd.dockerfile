@@ -27,17 +27,10 @@ RUN chown node.node /home/node/kbn
 # Configure yarn for better network handling
 
 WORKDIR /home/node/kbn
-
-RUN yarn config set network-timeout 600000 && \
-    yarn config set network-concurrency 1 && \
-    yarn config set registry https://registry.yarnpkg.com/
-
-# Use cache mount for yarn cache and node_modules
-RUN --mount=type=cache,target=/usr/local/share/.cache/yarn/v6,sharing=locked \
-    --mount=type=cache,target=/root/.yarn,sharing=locked \
-    yarn osd bootstrap --production
-    
-RUN yarn osd bootstrap --production
+RUN for i in 1 2 3; do \
+      yarn osd bootstrap --production && break || \
+      (echo "Attempt $i failed, retrying in 30 seconds..." && sleep 30); \
+    done
 
 WORKDIR /home/node/kbn/plugins
 
