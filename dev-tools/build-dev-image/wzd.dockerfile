@@ -27,10 +27,7 @@ RUN chown node.node /home/node/kbn
 # Configure yarn for better network handling
 
 WORKDIR /home/node/kbn
-RUN for i in 1 2 3; do \
-      yarn osd bootstrap --production && break || \
-      (echo "Attempt $i failed, retrying in 30 seconds..." && sleep 30); \
-    done
+RUN yarn osd bootstrap --production
 
 WORKDIR /home/node/kbn/plugins
 
