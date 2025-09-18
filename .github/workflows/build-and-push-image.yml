@@ -71,5 +71,6 @@ jobs:
             --plugins-branch "${{ inputs.branch }}" \
             --ml-commons-branch "${{ inputs.branch }}" \
             --security-analytics-branch "${{ inputs.branch }}" \
+            --cache \
             --tag "${{ inputs.tag }}" \
             --push
