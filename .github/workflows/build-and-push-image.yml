@@ -116,8 +116,7 @@ jobs:
             --ml-commons-branch "${{ inputs.branch }}" \
             --security-analytics-branch "${{ inputs.branch }}" \
             --tag "${{ inputs.tag }}-arm64" \
-            --platform "linux/arm64" \
-            --push
+            --platform "linux/arm64"
 
   create-manifest:
     runs-on: ubuntu-24.04
@@ -134,17 +133,19 @@ jobs:
 
       - name: Create and push multi-arch manifest
         run: |
-          # Create manifest list
+          # First, inspect what we're dealing with
+          docker manifest inspect quay.io/wazuh/osd-dev:${{ inputs.tag }}-amd64 || true
+          docker manifest inspect quay.io/wazuh/osd-dev:${{ inputs.tag }}-arm64 || true
+          
+          # If the individual arch images are manifest lists, we need to get their digests
+          # Create manifest list using digests instead of tags
+          AMD64_DIGEST=$(docker manifest inspect quay.io/wazuh/osd-dev:${{ inputs.tag }}-amd64 | jq -r '.manifests[] | select(.platform.architecture=="amd64") | .digest')
+          ARM64_DIGEST=$(docker manifest inspect quay.io/wazuh/osd-dev:${{ inputs.tag }}-arm64 | jq -r '.manifests[] | select(.platform.architecture=="arm64") | .digest')
+          
+          # Create manifest list using digests
           docker manifest create quay.io/wazuh/osd-dev:${{ inputs.tag }} \
-            quay.io/wazuh/osd-dev:${{ inputs.tag }}-amd64 \
-            quay.io/wazuh/osd-dev:${{ inputs.tag }}-arm64
-
-          # Annotate architectures
-          docker manifest annotate quay.io/wazuh/osd-dev:${{ inputs.tag }} \
-            quay.io/wazuh/osd-dev:${{ inputs.tag }}-amd64 --arch amd64
-
-          docker manifest annotate quay.io/wazuh/osd-dev:${{ inputs.tag }} \
-            quay.io/wazuh/osd-dev:${{ inputs.tag }}-arm64 --arch arm64
+            quay.io/wazuh/osd-dev@${AMD64_DIGEST} \
+            quay.io/wazuh/osd-dev@${ARM64_DIGEST}
 
           # Push manifest
           docker manifest push quay.io/wazuh/osd-dev:${{ inputs.tag }}
