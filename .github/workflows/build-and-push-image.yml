@@ -116,7 +116,8 @@ jobs:
             --ml-commons-branch "${{ inputs.branch }}" \
             --security-analytics-branch "${{ inputs.branch }}" \
             --tag "${{ inputs.tag }}-arm64" \
-            --platform "linux/arm64"
+            --platform "linux/arm64" \
+            --push
 
   create-manifest:
     runs-on: ubuntu-24.04
