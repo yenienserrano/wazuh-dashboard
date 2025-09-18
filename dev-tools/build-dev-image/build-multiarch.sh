@@ -141,7 +141,7 @@ fi
 
 # Optional: Use local cache to speed up builds
 if [ "$CACHE" = true ]; then
-    BUILDX_ARGS+=(BUILDKIT_INLINE_CACHE=1)
+    BUILDX_ARGS+=(--build-arg BUILDKIT_INLINE_CACHE=1)
     BUILDX_ARGS+=(--cache-from type=gha)
     BUILDX_ARGS+=(--cache-to type=gha,mode=max)
 fi
