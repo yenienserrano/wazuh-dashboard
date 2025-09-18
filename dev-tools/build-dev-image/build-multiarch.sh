@@ -46,7 +46,7 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --platform)
-            PLATFORMS="$2"
+            PLATFORM="$2"
             shift 2
             ;;
         -o|--opensearch-version)
