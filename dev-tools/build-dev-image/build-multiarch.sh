@@ -11,6 +11,7 @@ WAZUH_DASHBOARD_ML_COMMONS_BRANCH="main"
 WAZUH_DASHBOARD_SECURITY_ANALYTICS_BRANCH="main"
 TAG="3.2.0-5.0.0"
 PUSH=false
+CACHE=false
 
 # Function to show help
 show_help() {
@@ -28,6 +29,7 @@ OPTIONS:
     -sa, --security-analytics-branch  Wazuh Dashboard Security Analytics branch (default: $WAZUH_DASHBOARD_SECURITY_ANALYTICS_BRANCH)
     -t, --tag                       Image tag (default: $TAG)
     --push                          Push image to registry
+    --cache                         Use github actions cache to speed up builds
     -h, --help                      Show this help
 
 EXAMPLES:
@@ -80,6 +82,10 @@ while [[ $# -gt 0 ]]; do
             PUSH=true
             shift
             ;;
+        --cache)
+            CACHE=true
+            shift
+            ;;
         -h|--help)
             show_help
             exit 0
@@ -103,6 +109,7 @@ echo "Plugins Branch: $WAZUH_DASHBOARD_PLUGINS_BRANCH"
 echo "ML Commons Branch: $WAZUH_DASHBOARD_ML_COMMONS_BRANCH"
 echo "Security Analytics Branch: $WAZUH_DASHBOARD_SECURITY_ANALYTICS_BRANCH"
 echo "Tag: quay.io/wazuh/osd-dev:$TAG"
+echo "Use Cache: $CACHE"
 echo "Push: $PUSH"
 echo "==========================="
 
@@ -130,6 +137,13 @@ if [ "$PUSH" = true ]; then
     BUILDX_ARGS+=(--push)
 else
     BUILDX_ARGS+=(--load)
+fi
+
+# Optional: Use local cache to speed up builds
+if [ "$CACHE" = true ]; then
+    BUILDX_ARGS+=(BUILDKIT_INLINE_CACHE=1)
+    BUILDX_ARGS+=(--cache-from type=gha)
+    BUILDX_ARGS+=(--cache-to type=gha,mode=max)
 fi
 
 BUILDX_ARGS+=(.)
