@@ -9,6 +9,7 @@ WAZUH_DASHBOARD_REPORTING_BRANCH="main"
 WAZUH_DASHBOARD_PLUGINS_BRANCH="main"
 WAZUH_DASHBOARD_SECURITY_ANALYTICS_BRANCH="main"
 TAG="3.2.0-5.0.0"
+PLATFORM="linux/amd64,linux/arm64"
 PUSH=false
 
 # Function to show help
@@ -25,6 +26,7 @@ OPTIONS:
     -p, --plugins-branch            Wazuh Dashboard Plugins branch (default: $WAZUH_DASHBOARD_PLUGINS_BRANCH)
     -sa, --security-analytics-branch  Wazuh Dashboard Security Analytics branch (default: $WAZUH_DASHBOARD_SECURITY_ANALYTICS_BRANCH)
     -t, --tag                       Image tag (default: $TAG)
+    --platform                      Target platform (default: $PLATFORM)
     --push                          Push image to registry
     -h, --help                      Show this help
 
@@ -70,6 +72,10 @@ while [[ $# -gt 0 ]]; do
             TAG="$2"
             shift 2
             ;;
+        --platform)
+            PLATFORM="$2"
+            shift 2
+            ;;
         --push)
             PUSH=true
             shift
@@ -96,6 +102,7 @@ echo "Reporting Branch: $WAZUH_DASHBOARD_REPORTING_BRANCH"
 echo "Plugins Branch: $WAZUH_DASHBOARD_PLUGINS_BRANCH"
 echo "Security Analytics Branch: $WAZUH_DASHBOARD_SECURITY_ANALYTICS_BRANCH"
 echo "Tag: quay.io/wazuh/osd-dev:$TAG"
+echo "Platform: $PLATFORM"
 echo "Push: $PUSH"
 echo "==========================="
 
@@ -105,7 +112,7 @@ docker buildx inspect multiarch >/dev/null 2>&1 || docker buildx create --use --
 
 # Prepare buildx arguments
 BUILDX_ARGS=(
-    --platform linux/amd64,linux/arm64
+    --platform "$PLATFORM"
     --build-arg NODE_VERSION="$NODE_VERSION"
     --build-arg OPENSEARCH_DASHBOARD_VERSION="$OPENSEARCH_DASHBOARD_VERSION"
     --build-arg WAZUH_DASHBOARD_BRANCH="$WAZUH_DASHBOARD_BRANCH"
@@ -117,17 +124,31 @@ BUILDX_ARGS=(
     -f wzd.dockerfile
 )
 
-# Add --push if enabled
+# Add --push if enabled, or use --load for single platform builds
 if [ "$PUSH" = true ]; then
     BUILDX_ARGS+=(--push)
 else
-    BUILDX_ARGS+=(--load)
+    # Check if building for multiple platforms
+    if [[ "$PLATFORM" == *","* ]]; then
+        echo "Warning: Multi-platform build requires --push. Adding --push automatically."
+        BUILDX_ARGS+=(--push)
+    else
+        BUILDX_ARGS+=(--load)
+    fi
 fi
 
 BUILDX_ARGS+=(.)
 
-# Execute build
-echo "Running docker buildx build..."
+# Clean up before build to free memory
+echo "Cleaning up Docker resources..."
+docker system prune -af || true
+
+# Execute build with memory optimizations
+echo "Running docker buildx build with memory optimizations..."
+# Set Docker daemon options for memory efficiency
+export DOCKER_BUILDKIT=1
+export BUILDKIT_PROGRESS=plain
+
 docker buildx build "${BUILDX_ARGS[@]}"
 
 if [ $? -eq 0 ]; then
