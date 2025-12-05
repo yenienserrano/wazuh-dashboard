@@ -1,11 +1,11 @@
-# This workflow automates the build and push of Wazuh Dashboard development
+# This workflow automates the build and push of Wazuh dashboard development
 # Docker images for different architectures (amd64 and arm64).
 #
 # This workflow:
-# - Builds multi-architecture Docker images for Wazuh Dashboard development.
+# - Builds multi-architecture Docker images for Wazuh dashboard development.
 # - Pushes individual architecture images to Quay.io registry.
 # - Creates and pushes a multi-arch manifest combining both architectures.
-# - Customizable in Node.js version, OpenSearch Dashboard plugins version, branch, and image tag.
+# - Customizable in Node.js version, OpenSearch Dashboards plugins version, branch, and image tag.
 
 name: (5.x) Build and Push Image
 
@@ -28,7 +28,7 @@ on:
         default: '20.18.3'
         type: string
       opensearch_version:
-        description: 'Version of OpenSearch Dashboard plugins to install'
+        description: 'Version of OpenSearch Dashboards plugins to install'
         required: false
         default: '3.3.0.0'
         type: string
