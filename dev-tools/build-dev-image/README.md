@@ -61,12 +61,12 @@ The `build-multiarch.sh` script simplifies building images for both AMD64 and AR
 |--------|-------|-------------|---------|
 | `--node-version` | `-n` | Node.js version | `20.18.3` |
 | `--opensearch-version` | `-o` | OpenSearch Dashboard version | `3.3.0.0` |
-| `--wazuh-branch` | `-w` | Wazuh Dashboard branch | `migrate-main-to-3.3.0` |
-| `--security-branch` | `-s` | Wazuh Dashboard Security branch | `migrate-main-to-3.3.0.0` |
-| `--reporting-branch` | `-r` | Wazuh Dashboard Reporting branch | `migrate-main-to-3.3.0.0` |
-| `--plugins-branch` | `-p` | Wazuh Dashboard Plugins branch | `migrate-main-to-3.3.0` |
-| `--ml-commons-branch` | `-ml` | Wazuh Dashboard ML commons branch | `migrate-main-to-3.3.0` |
-| `--security-analytics-branch` | `-sa` | Wazuh Dashboard Security analystics branch | `migrate-main-to-3.3.0` |
+| `--wazuh-branch` | `-w` | Wazuh Dashboard branch | `main` |
+| `--security-branch` | `-s` | Wazuh Dashboard Security branch | `main` |
+| `--reporting-branch` | `-r` | Wazuh Dashboard Reporting branch | `main` |
+| `--plugins-branch` | `-p` | Wazuh Dashboard Plugins branch | `main` |
+| `--ml-commons-branch` | `-ml` | Wazuh Dashboard ML commons branch | `main` |
+| `--security-analytics-branch` | `-sa` | Wazuh Dashboard Security analystics branch | `main` |
 | `--tag` | `-t` | Docker image tag | `3.3.0-5.0.0` |
 | `--platform` | `-pl` | Target platform (architecture) | `linux/amd64,linux/arm64` |
 | `--push` | | Push image to registry | `false` (local build) |
