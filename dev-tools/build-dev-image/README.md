@@ -68,6 +68,7 @@ The `build-multiarch.sh` script simplifies building images for both AMD64 and AR
 | `--ml-commons-branch` | `-ml` | Wazuh Dashboard ML commons branch | `migrate-main-to-3.3.0` |
 | `--security-analytics-branch` | `-sa` | Wazuh Dashboard Security analystics branch | `migrate-main-to-3.3.0` |
 | `--tag` | `-t` | Docker image tag | `3.3.0-5.0.0` |
+| `--platform` | `-pl` | Target platform (architecture) | `linux/amd64,linux/arm64` |
 | `--push` | | Push image to registry | `false` (local build) |
 | `--help` | `-h` | Show help message | |
 
