@@ -5,21 +5,24 @@
 # - Builds multi-architecture Docker images for Wazuh dashboard development.
 # - Pushes individual architecture images to Quay.io registry.
 # - Creates and pushes a multi-arch manifest combining both architectures.
-# - Customizable in Node.js version, OpenSearch Dashboards plugins version, branch, and image tag.
+# - Automatically extracts versions from package.json and .nvmrc
+# - Supports manual triggering with customizable inputs for Node.js version, OpenSearch Dashboards plugins version, branch, and image tag.
 
 name: (5.x) Build and Push Image
 
 on:
+  schedule:
+    - cron: '0 0 * * 1-5' # Runs at 00:00 every weekday (Monday to Friday)
   workflow_dispatch:
     inputs:
       branch:
         description: 'Branch to use for all Wazuh dashboard components'
-        required: true
+        required: false
         default: 'main'
         type: string
       tag:
-        description: 'Docker image tag'
-        required: true
+        description: 'Tag for the Docker image'
+        required: false
         default: '3.3.0'
         type: string
       node_version:
@@ -34,8 +37,60 @@ on:
         type: string
 
 jobs:
+  extract-versions:
+    runs-on: ubuntu-24.04
+    outputs:
+      opensearch_version: ${{ steps.versions.outputs.opensearch_version }}
+      tag: ${{ steps.versions.outputs.tag }}
+      node_version: ${{ steps.versions.outputs.node_version }}
+      branch: ${{ steps.versions.outputs.branch }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || github.ref_name }}
+
+      - name: Extract versions from repository
+        id: versions
+        run: |
+          # Extract from package.json
+          OPENSEARCH_VERSION=$(node -p "require('./package.json').version")
+
+          # Extract from .nvmrc
+          NODE_VERSION=$(cat .nvmrc)
+
+          # Get current branch
+          BRANCH="${{ inputs.branch || github.ref_name }}"
+
+          # Determine tag
+          TAG="${{ inputs.tag }}"
+          if [ -z "$TAG" ]; then
+            TAG="$OPENSEARCH_VERSION"
+          fi
+
+          FINAL_OPENSEARCH_VERSION="${{ inputs.opensearch_version }}"
+          if [ -z "$FINAL_OPENSEARCH_VERSION" ]; then
+            FINAL_OPENSEARCH_VERSION="${OPENSEARCH_VERSION}.0"
+          fi
+
+          FINAL_NODE_VERSION="${{ inputs.node_version }}"
+          if [ -z "$FINAL_NODE_VERSION" ]; then
+            FINAL_NODE_VERSION="$NODE_VERSION"
+          fi
+
+          echo "opensearch_version=${FINAL_OPENSEARCH_VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "node_version=${FINAL_NODE_VERSION}" >> $GITHUB_OUTPUT
+          echo "branch=${BRANCH}" >> $GITHUB_OUTPUT
+
+          echo "📦 OpenSearch Version: ${FINAL_OPENSEARCH_VERSION}"
+          echo "🏷️  Tag: ${TAG}"
+          echo "📟 Node Version: ${FINAL_NODE_VERSION}"
+          echo "🌿 Branch: ${BRANCH}"
+
   build:
     runs-on: ${{ matrix.runner }}
+    needs: [extract-versions]
     strategy:
       matrix:
         include:
@@ -84,20 +139,20 @@ jobs:
           cd ./dev-tools/build-dev-image
 
           ./build-multiarch.sh \
-            --node-version "${{ inputs.node_version }}" \
-            --opensearch-version "${{ inputs.opensearch_version }}" \
-            --wazuh-branch "${{ inputs.branch }}" \
-            --security-branch "${{ inputs.branch }}" \
-            --reporting-branch "${{ inputs.branch }}" \
-            --plugins-branch "${{ inputs.branch }}" \
-            --security-analytics-branch "${{ inputs.branch }}" \
-            --tag "${{ inputs.tag }}-${{ matrix.arch }}" \
+            --node-version "${{  needs.extract-versions.outputs.node_version }}" \
+            --opensearch-version "${{ needs.extract-versions.outputs.opensearch_version }}" \
+            --wazuh-branch "${{ needs.extract-versions.outputs.branch }}" \
+            --security-branch "${{ needs.extract-versions.outputs.branch }}" \
+            --reporting-branch "${{ needs.extract-versions.outputs.branch }}" \
+            --plugins-branch "${{ needs.extract-versions.outputs.branch }}" \
+            --security-analytics-branch "${{ needs.extract-versions.outputs.branch }}" \
+            --tag "${{ needs.extract-versions.outputs.tag }}-${{ matrix.arch }}" \
             --platform "${{ matrix.platform }}" \
             --push
 
   create-manifest:
     runs-on: ubuntu-24.04
-    needs: [build]
+    needs: [extract-versions, build]
 
     steps:
       - name: Set up Docker Buildx
@@ -109,12 +164,14 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_TOKEN }}
+
       - name: Create and push multi-arch manifest
         run: |
-          # Create and push multi-arch manifest using buildx imagetools
-          docker buildx imagetools create -t quay.io/wazuh/osd-dev:${{ inputs.tag }} \
-            quay.io/wazuh/osd-dev:${{ inputs.tag }}-amd64 \
-            quay.io/wazuh/osd-dev:${{ inputs.tag }}-arm64
+          TAG="${{ needs.extract-versions.outputs.tag }}"
+
+          docker buildx imagetools create -t quay.io/wazuh/osd-dev:${TAG} \
+            quay.io/wazuh/osd-dev:${TAG}-amd64 \
+            quay.io/wazuh/osd-dev:${TAG}-arm64
 
           echo "✅ Multi-arch manifest created and pushed!"
-          echo "📦 Image available at: quay.io/wazuh/osd-dev:${{ inputs.tag }}"
+          echo "📦 Image available at: quay.io/wazuh/osd-dev:${TAG}"
