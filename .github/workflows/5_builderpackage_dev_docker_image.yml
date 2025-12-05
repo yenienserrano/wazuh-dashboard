@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Branch to use for all Wazuh Dashboard components'
+        description: 'Branch to use for all Wazuh dashboard components'
         required: true
         default: 'main'
         type: string
@@ -19,7 +19,7 @@ on:
         default: '20.18.3'
         type: string
       opensearch_version:
-        description: 'OpenSearch Dashboard version'
+        description: 'OpenSearch Dashboards version'
         required: false
         default: '3.3.0.0'
         type: string
